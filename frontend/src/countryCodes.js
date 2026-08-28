@@ -1,0 +1,62 @@
+// Common countries with their ISO code, name, and dial code, for the
+// phone number country-code dropdown. Not exhaustive, but covers the
+// large majority of users.
+export const COUNTRY_CODES = [
+  { iso: "PK", name: "Pakistan", dial: "+92", nationalLengths: [10] },
+  { iso: "US", name: "United States", dial: "+1", nationalLengths: [10] },
+  { iso: "CA", name: "Canada", dial: "+1", nationalLengths: [10] },
+  { iso: "GB", name: "United Kingdom", dial: "+44", nationalLengths: [10] },
+  { iso: "IN", name: "India", dial: "+91", nationalLengths: [10] },
+  { iso: "AE", name: "United Arab Emirates", dial: "+971", nationalLengths: [9] },
+  { iso: "SA", name: "Saudi Arabia", dial: "+966", nationalLengths: [9] },
+  { iso: "AU", name: "Australia", dial: "+61", nationalLengths: [9] },
+  { iso: "DE", name: "Germany", dial: "+49", nationalLengths: [10,11] },
+  { iso: "FR", name: "France", dial: "+33", nationalLengths: [9] },
+  { iso: "IT", name: "Italy", dial: "+39", nationalLengths: [9,10] },
+  { iso: "ES", name: "Spain", dial: "+34", nationalLengths: [9] },
+  { iso: "NL", name: "Netherlands", dial: "+31", nationalLengths: [9] },
+  { iso: "SE", name: "Sweden", dial: "+46", nationalLengths: [9] },
+  { iso: "CH", name: "Switzerland", dial: "+41", nationalLengths: [9] },
+  { iso: "IE", name: "Ireland", dial: "+353", nationalLengths: [9] },
+  { iso: "SG", name: "Singapore", dial: "+65", nationalLengths: [8] },
+  { iso: "MY", name: "Malaysia", dial: "+60", nationalLengths: [9,10] },
+  { iso: "ID", name: "Indonesia", dial: "+62", nationalLengths: [9,10,11] },
+  { iso: "PH", name: "Philippines", dial: "+63", nationalLengths: [10] },
+  { iso: "BD", name: "Bangladesh", dial: "+880", nationalLengths: [10] },
+  { iso: "LK", name: "Sri Lanka", dial: "+94", nationalLengths: [9] },
+  { iso: "NP", name: "Nepal", dial: "+977", nationalLengths: [10] },
+  { iso: "CN", name: "China", dial: "+86", nationalLengths: [11] },
+  { iso: "JP", name: "Japan", dial: "+81", nationalLengths: [9,10] },
+  { iso: "KR", name: "South Korea", dial: "+82", nationalLengths: [9,10] },
+  { iso: "TR", name: "Turkey", dial: "+90", nationalLengths: [10] },
+  { iso: "EG", name: "Egypt", dial: "+20", nationalLengths: [10] },
+  { iso: "NG", name: "Nigeria", dial: "+234", nationalLengths: [10] },
+  { iso: "KE", name: "Kenya", dial: "+254", nationalLengths: [9] },
+  { iso: "ZA", name: "South Africa", dial: "+27", nationalLengths: [9] },
+  { iso: "BR", name: "Brazil", dial: "+55", nationalLengths: [10,11] },
+  { iso: "MX", name: "Mexico", dial: "+52", nationalLengths: [10] },
+  { iso: "AR", name: "Argentina", dial: "+54", nationalLengths: [10] },
+  { iso: "RU", name: "Russia", dial: "+7", nationalLengths: [10] },
+  { iso: "QA", name: "Qatar", dial: "+974", nationalLengths: [8] },
+  { iso: "KW", name: "Kuwait", dial: "+965", nationalLengths: [8] },
+  { iso: "OM", name: "Oman", dial: "+968", nationalLengths: [8] },
+  { iso: "BH", name: "Bahrain", dial: "+973", nationalLengths: [8] },
+  { iso: "NZ", name: "New Zealand", dial: "+64", nationalLengths: [8,9] },
+  { iso: "PT", name: "Portugal", dial: "+351", nationalLengths: [9] },
+  { iso: "PL", name: "Poland", dial: "+48", nationalLengths: [9] },
+  { iso: "NO", name: "Norway", dial: "+47", nationalLengths: [8] },
+  { iso: "DK", name: "Denmark", dial: "+45", nationalLengths: [8] },
+  { iso: "FI", name: "Finland", dial: "+358", nationalLengths: [9,10] },
+  { iso: "BE", name: "Belgium", dial: "+32", nationalLengths: [9] },
+  { iso: "AT", name: "Austria", dial: "+43", nationalLengths: [10,11] },
+  { iso: "GR", name: "Greece", dial: "+30", nationalLengths: [10] },
+  { iso: "IL", name: "Israel", dial: "+972", nationalLengths: [9] },
+  { iso: "TH", name: "Thailand", dial: "+66", nationalLengths: [9] },
+  { iso: "VN", name: "Vietnam", dial: "+84", nationalLengths: [9,10] },
+];
+
+export const DEFAULT_COUNTRY_DIAL = "+92";
+
+export function findCountryByDial(dial) {
+  return COUNTRY_CODES.find((c) => c.dial === dial);
+}
