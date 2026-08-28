@@ -21,3 +21,9 @@ frontend/dist/
 Thumbs.db
 .vscode/
 .idea/
+
+.env
+.env.local
+*.db
+*.sqlite
+*.sqlite3
