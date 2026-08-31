@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import QueuePool, StaticPool
 
 from .config import settings
 
@@ -26,24 +26,26 @@ elif database_url.startswith("postgresql://"):
 
 
 # ---------------------------------------------------------
-# Database connection settings
+# Connection settings
 # ---------------------------------------------------------
 
 connect_args = {}
 
+
 if database_url.startswith("sqlite"):
+
     connect_args = {
         "check_same_thread": False
     }
 
+
 elif database_url.startswith("postgresql+psycopg2://"):
 
-    # Supabase requires SSL.
-    if "sslmode=" not in database_url.lower():
-        connect_args["sslmode"] = "require"
-
-    # Don't let a dead database connection hang a Vercel function.
-    connect_args["connect_timeout"] = 10
+    connect_args = {
+        "sslmode": "require",
+        "connect_timeout": 5,
+        "application_name": "resumeforge",
+    }
 
 
 # ---------------------------------------------------------
@@ -55,13 +57,25 @@ engine_kwargs = {
 }
 
 
-# Vercel functions are short-lived.
-# NullPool prevents stale connections between invocations.
-if (
-    database_url.startswith("postgresql+psycopg2://")
-    and settings.is_vercel
-):
-    engine_kwargs["poolclass"] = NullPool
+if database_url.startswith("postgresql+psycopg2://"):
+
+    # IMPORTANT FOR VERCEL
+    #
+    # Reuse a small connection pool on warm serverless
+    # instances instead of creating a new PostgreSQL
+    # connection for every request.
+    engine_kwargs.update({
+        "poolclass": QueuePool,
+        "pool_size": 1,
+        "max_overflow": 0,
+        "pool_timeout": 5,
+        "pool_recycle": 300,
+    })
+
+
+elif database_url.startswith("sqlite"):
+
+    engine_kwargs["poolclass"] = StaticPool
 
 
 engine = create_engine(
@@ -71,9 +85,14 @@ engine = create_engine(
 )
 
 
+# ---------------------------------------------------------
+# Session
+# ---------------------------------------------------------
+
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
+    expire_on_commit=False,
     bind=engine,
 )
 
@@ -81,11 +100,18 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 
+# ---------------------------------------------------------
+# Database dependency
+# ---------------------------------------------------------
+
 def get_db():
+
     db = SessionLocal()
 
     try:
+
         yield db
 
     finally:
+
         db.close()
