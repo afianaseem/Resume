@@ -86,19 +86,6 @@ function Editable({
    EDITABLE DATE
    ========================================================= */
 
-/*
-  Dates are intentionally edited as one display field.
-
-  Example:
-      Jan 2022 – May 2026
-
-  When the user edits it, the value is stored in:
-      item.date_display
-
-  This means the original ISO dates are preserved and the user
-  can freely customize how the dates appear in the resume.
-*/
-
 function EditableDate({ item, onChange }) {
   const value = dateRange(item);
 
@@ -182,7 +169,7 @@ function ExperienceSection({
         {items.map((exp, index) => (
           <div className="resume-item" key={index}>
             <div className="resume-item-top">
-              <div>
+              <div className="resume-item-main">
                 {editable ? (
                   <Editable
                     value={exp.role}
@@ -219,7 +206,7 @@ function ExperienceSection({
                 exp.current ||
                 exp.date_display ||
                 editable) && (
-                <>
+                <div className="resume-item-date">
                   {editable ? (
                     <EditableDate
                       item={exp}
@@ -235,7 +222,7 @@ function ExperienceSection({
                       {dateRange(exp)}
                     </span>
                   )}
-                </>
+                </div>
               )}
             </div>
 
@@ -310,7 +297,7 @@ function EducationSection({
         {items.map((edu, index) => (
           <div className="resume-item" key={index}>
             <div className="resume-item-top">
-              <div>
+              <div className="resume-item-main">
                 {editable ? (
                   <div className="resume-edit-heading-group">
                     <Editable
@@ -361,7 +348,7 @@ function EducationSection({
                 edu.current ||
                 edu.date_display ||
                 editable) && (
-                <>
+                <div className="resume-item-date">
                   {editable ? (
                     <EditableDate
                       item={edu}
@@ -377,7 +364,7 @@ function EducationSection({
                       {dateRange(edu)}
                     </span>
                   )}
-                </>
+                </div>
               )}
             </div>
 
@@ -510,19 +497,30 @@ function ProjectsSection({
       <div className="resume-items">
         {items.map((project, index) => (
           <div className="resume-item" key={index}>
-            <div className="resume-item-top">
-              <div>
+            {/* 
+              PROJECT HEADER
+
+              The project information gets its own flexible column.
+              The project link gets a smaller fixed column.
+
+              This gives the project title and tech stack much more
+              horizontal space while keeping the link aligned.
+            */}
+            <div className="resume-project-top">
+              <div className="resume-project-main">
                 {editable ? (
                   <Editable
                     value={project.title}
                     onChange={(value) =>
                       update(index, "title", value)
                     }
-                    className="resume-edit-heading"
+                    className="resume-edit-heading resume-project-title"
                     placeholder="Project name"
                   />
                 ) : (
-                  <h3>{project.title || "Project"}</h3>
+                  <h3 className="resume-project-title">
+                    {project.title || "Project"}
+                  </h3>
                 )}
 
                 {editable ? (
@@ -531,39 +529,41 @@ function ProjectsSection({
                     onChange={(value) =>
                       update(index, "tech_stack", value)
                     }
-                    className="resume-company resume-edit-block"
+                    className="resume-company resume-edit-block resume-project-tech"
                     placeholder="Technologies / tools"
                   />
                 ) : (
                   project.tech_stack && (
-                    <p className="resume-company">
+                    <p className="resume-company resume-project-tech">
                       {project.tech_stack}
                     </p>
                   )
                 )}
               </div>
 
-              {editable ? (
-                <Editable
-                  value={project.link}
-                  onChange={(value) =>
-                    update(index, "link", value)
-                  }
-                  className="resume-project-link resume-edit-block"
-                  placeholder="Project URL"
-                />
-              ) : (
-                project.link && (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="resume-project-link"
-                  >
-                    View project ↗
-                  </a>
-                )
-              )}
+              <div className="resume-project-link-wrap">
+                {editable ? (
+                  <Editable
+                    value={project.link}
+                    onChange={(value) =>
+                      update(index, "link", value)
+                    }
+                    className="resume-project-link resume-edit-block"
+                    placeholder="Project URL"
+                  />
+                ) : (
+                  project.link && (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="resume-project-link"
+                    >
+                      View project ↗
+                    </a>
+                  )
+                )}
+              </div>
             </div>
 
             {editable ? (
@@ -572,13 +572,13 @@ function ProjectsSection({
                 onChange={(value) =>
                   update(index, "description", value)
                 }
-                className="resume-description resume-edit-block"
+                className="resume-description resume-edit-block resume-project-description"
                 placeholder="Describe the project and your contribution"
                 multiline
               />
             ) : (
               project.description && (
-                <p className="resume-description">
+                <p className="resume-description resume-project-description">
                   {project.description}
                 </p>
               )
@@ -738,29 +738,6 @@ export default function ResumeDocument({
 
       next.skills[index] = field;
     } else if (field === "date_display") {
-      /*
-        IMPORTANT:
-
-        We deliberately store edited dates in date_display.
-
-        Example:
-
-        Existing:
-          start_date = 2022-01-01
-          end_date   = 2026-05-01
-
-        Display:
-          Jan 2022 – May 2026
-
-        User changes it to:
-          Jan 2021 – Present
-
-        We store:
-          date_display = "Jan 2021 – Present"
-
-        This keeps the original ISO values intact.
-      */
-
       if (!next[key]) {
         next[key] = [];
       }
