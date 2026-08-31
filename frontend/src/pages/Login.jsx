@@ -147,7 +147,7 @@ export default function Login() {
 
             <p className="auth-switch">
               New to ResumeForge?{" "}
-              <Link to="/signup">Create an account</Link>
+              <Link to="/signup">Sign up</Link>
             </p>
           </form>
         </section>
