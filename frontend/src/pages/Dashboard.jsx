@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { listResumes, getResume, deleteResume, createResume } from "../api/resumes";
+import { listResumes, deleteResume, createResume } from "../api/resumes";
 import Navbar from "../components/Navbar";
 import ResumeDocument from "../components/ResumeDocument";
 import { getTemplate } from "../templates";
 
 function formatDate(iso) {
   if (!iso) return "Unknown";
-  return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString(undefined, {
+    year: "numeric", month: "short", day: "numeric",
+  });
 }
 
 function getResumeInitials(name) {
@@ -15,7 +17,41 @@ function getResumeInitials(name) {
   return name.split(" ").map((word) => word[0]).join("").slice(0, 2).toUpperCase();
 }
 
-function ResumeThumbnail({ resume }) {
+/*
+ * ResumeDocument is intentionally expensive because it is the real A4
+ * renderer. The old dashboard rendered one full document for every resume
+ * immediately. On a dashboard with several resumes this created a large
+ * amount of DOM/layout work before the page became interactive.
+ *
+ * Render the real preview only when its card is near the viewport.
+ */
+function LazyResumeThumbnail({ resume }) {
+  const hostRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = hostRef.current;
+    if (!node) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "500px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const thumbnailResume = {
     ...resume,
     personal_info: resume.personal_info || {},
@@ -26,14 +62,26 @@ function ResumeThumbnail({ resume }) {
   };
 
   if (!thumbnailResume.personal_info.full_name) {
-    thumbnailResume.personal_info.full_name = resume.name || "Your Name";
+    thumbnailResume.personal_info = {
+      ...thumbnailResume.personal_info,
+      full_name: resume.name || "Your Name",
+    };
   }
 
   return (
-    <div className="resume-card-preview" aria-hidden="true">
+    <div ref={hostRef} className="resume-card-preview" aria-hidden="true">
       <div className="resume-card-preview-viewport">
         <div className="resume-card-preview-scale">
-          <ResumeDocument resume={thumbnailResume} templateId={resume.template || "classic"} />
+          {visible ? (
+            <ResumeDocument
+              resume={thumbnailResume}
+              templateId={resume.template || "classic"}
+            />
+          ) : (
+            <div className="resume-thumbnail-placeholder">
+              <div className="loading-spinner" />
+            </div>
+          )}
         </div>
       </div>
       <div className="resume-card-preview-overlay" />
@@ -53,34 +101,32 @@ export default function Dashboard() {
     setLoading(true);
     setError("");
     try {
-      // /resumes intentionally returns lightweight list records. Fetch the
-      // complete resume for each card so the dashboard can render the actual
-      // resume content rather than only its name.
+      // ONE request. The old version did listResumes() and then GET /resumes/:id
+      // for every item (N+1 HTTP requests).
       const list = await listResumes();
-      const fullResumes = await Promise.all(
-        list.map(async (item) => {
-          try {
-            return await getResume(item.id);
-          } catch {
-            return item;
-          }
-        })
+      setResumes(list);
+    } catch (error) {
+      setError(
+        error?.code === "ECONNABORTED"
+          ? "The server took too long to respond. Please refresh once."
+          : "Could not load your resumes."
       );
-      setResumes(fullResumes);
-    } catch {
-      setError("Could not load your resumes.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const handleCreate = async () => {
     const name = window.prompt('Name this resume (e.g. "Python Developer 2026")');
     if (!name?.trim()) return;
+
     setCreating(true);
     setError("");
+
     try {
       const resume = await createResume({ name: name.trim() });
       navigate(`/resumes/${resume.id}/template`);
@@ -93,6 +139,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete "${name}"?\n\nThis action cannot be undone.`)) return;
+
     try {
       await deleteResume(id);
       setResumes((previous) => previous.filter((resume) => resume.id !== id));
@@ -104,6 +151,7 @@ export default function Dashboard() {
   return (
     <div className="app-shell">
       <Navbar />
+
       <main className="page-content dashboard-page">
         <section className="dashboard-hero">
           <div>
@@ -111,54 +159,106 @@ export default function Dashboard() {
             <h1>Your resumes</h1>
             <p>Create polished resumes, keep different versions, and tailor your applications with ease.</p>
           </div>
-          <button className="btn-primary create-button" onClick={handleCreate} disabled={creating}>
-            <span className="button-plus">+</span>{creating ? "Creating..." : "Create new resume"}
+
+          <button
+            className="btn-primary create-button"
+            onClick={handleCreate}
+            disabled={creating}
+          >
+            <span className="button-plus">+</span>
+            {creating ? "Creating..." : "Create new resume"}
           </button>
         </section>
 
-        {error && <div className="form-error dashboard-error"><span>!</span>{error}</div>}
+        {error && (
+          <div className="form-error dashboard-error">
+            <span>!</span>{error}
+          </div>
+        )}
 
         {!loading && (
           <section className="dashboard-stats">
-            <div className="stat-card"><div className="stat-icon">▤</div><div><span className="stat-label">Total resumes</span><strong>{resumes.length}</strong></div></div>
-            <div className="stat-card"><div className="stat-icon">✦</div><div><span className="stat-label">Workspace</span><strong>Personal</strong></div></div>
-            <div className="stat-card"><div className="stat-icon">✓</div><div><span className="stat-label">Resume builder</span><strong>Ready</strong></div></div>
+            <div className="stat-card">
+              <div className="stat-icon">▤</div>
+              <div><span className="stat-label">Total resumes</span><strong>{resumes.length}</strong></div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">✦</div>
+              <div><span className="stat-label">Workspace</span><strong>Personal</strong></div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">✓</div>
+              <div><span className="stat-label">Resume builder</span><strong>Ready</strong></div>
+            </div>
           </section>
         )}
 
         <section className="dashboard-section">
           <div className="section-heading-row">
-            <div><h2>Your resume collection</h2><p>Manage your saved resumes and continue where you left off.</p></div>
-            {!loading && resumes.length > 0 && <span className="resume-count">{resumes.length} {resumes.length === 1 ? "resume" : "resumes"}</span>}
+            <div>
+              <h2>Your resume collection</h2>
+              <p>Manage your saved resumes and continue where you left off.</p>
+            </div>
+
+            {!loading && resumes.length > 0 && (
+              <span className="resume-count">
+                {resumes.length} {resumes.length === 1 ? "resume" : "resumes"}
+              </span>
+            )}
           </div>
 
           {loading ? (
-            <div className="dashboard-loading"><div className="loading-spinner" /><p>Loading your resumes...</p></div>
+            <div className="dashboard-loading">
+              <div className="loading-spinner" />
+              <p>Loading your resumes...</p>
+            </div>
           ) : resumes.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">✦</div>
               <h2>Create your first resume</h2>
               <p>Start building a professional resume in just a few minutes. You can create multiple versions for different applications.</p>
-              <button className="btn-primary" onClick={handleCreate}>+ Create my first resume</button>
+              <button className="btn-primary" onClick={handleCreate}>
+                + Create my first resume
+              </button>
             </div>
           ) : (
             <div className="resume-grid">
               {resumes.map((resume) => (
                 <article className="resume-card" key={resume.id}>
-                  <Link className="resume-card-preview-link" to={`/resumes/${resume.id}/preview`} aria-label={`Preview ${resume.name}`}>
-                    <ResumeThumbnail resume={resume} />
+                  <Link
+                    className="resume-card-preview-link"
+                    to={`/resumes/${resume.id}/preview`}
+                    aria-label={`Preview ${resume.name}`}
+                  >
+                    <LazyResumeThumbnail resume={resume} />
                   </Link>
 
                   <div className="resume-card-top">
                     <div className="resume-card-icon">{getResumeInitials(resume.name)}</div>
-                    <button type="button" className="card-menu" onClick={() => handleDelete(resume.id, resume.name)} title="Delete resume" aria-label={`Delete ${resume.name}`}>⋮</button>
+                    <button
+                      type="button"
+                      className="card-menu"
+                      onClick={() => handleDelete(resume.id, resume.name)}
+                      title="Delete resume"
+                      aria-label={`Delete ${resume.name}`}
+                    >
+                      ⋮
+                    </button>
                   </div>
 
                   <div className="resume-card-content">
                     <h3 title={resume.name}>{resume.name}</h3>
+
                     <div className="resume-card-meta-row">
                       <p className="resume-card-date">Updated {formatDate(resume.updated_at)}</p>
-                      <Link className="template-pill-link" to={`/resumes/${resume.id}/template`} title="Change template">{getTemplate(resume.template || "classic").name} template</Link>
+
+                      <Link
+                        className="template-pill-link"
+                        to={`/resumes/${resume.id}/template`}
+                        title="Change template"
+                      >
+                        {getTemplate(resume.template || "classic").name} template
+                      </Link>
                     </div>
                   </div>
 
