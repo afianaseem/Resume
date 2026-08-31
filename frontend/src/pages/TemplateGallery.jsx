@@ -57,3 +57,4 @@ export default function TemplateGallery() {
     <div className="template-apply-bar"><div><strong>{TEMPLATES.find(t=>t.id===selectedTemplate)?.name}</strong> · {getColor(selectedColor).name}</div><button className="btn-primary" onClick={apply} disabled={saving}>{saving ? "Saving…" : "Use selected template"}</button></div>
   </main></div>;
 }
+ 
