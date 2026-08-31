@@ -4623,3 +4623,282 @@ body {
   .template-real-preview .resume-print-area { transform: scale(.40); }
   .form-card { padding: 18px !important; }
 }
+
+
+/* =========================================================
+   RESPONSIVE FIX PACK — ResumeForge
+   Loaded last so it safely overrides older desktop/mobile rules.
+========================================================= */
+
+/* ---------- Header / account menu ---------- */
+.desktop-nav-links { display: flex; align-items: center; gap: 5px; }
+.mobile-menu-button { display: none; }
+.account-dropdown { display: none; }
+
+@media (max-width: 760px) {
+  .navbar { position: sticky; top: 0; z-index: 1000; }
+  .navbar-inner {
+    width: calc(100% - 20px) !important;
+    min-height: 64px !important;
+    gap: 10px;
+  }
+  .navbar-brand { font-size: 18px; gap: 8px; }
+  .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
+  .navbar-links { margin-left: auto; gap: 6px; }
+  .desktop-nav-links, .navbar-divider, .navbar-links > .user-menu > .user-info,
+  .navbar-links > .user-menu > .logout-button { display: none !important; }
+
+  .user-menu { position: relative; margin: 0 !important; }
+  .mobile-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 4px 10px 4px 5px;
+    border: 1px solid #e1e4ee;
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ui-ink, #141625);
+    box-shadow: 0 5px 16px rgba(25,31,55,.06);
+    cursor: pointer;
+  }
+  .mobile-menu-button .user-avatar { width: 32px; height: 32px; flex: 0 0 32px; }
+  .mobile-menu-label { font-size: 12px; font-weight: 800; }
+  .menu-chevron { font-size: 16px; line-height: 1; transition: transform .18s ease; }
+  .mobile-menu-button.open .menu-chevron { transform: rotate(180deg); }
+
+  .account-dropdown {
+    position: absolute;
+    display: block;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(280px, calc(100vw - 24px));
+    padding: 8px;
+    border: 1px solid #e3e6ef;
+    border-radius: 16px;
+    background: rgba(255,255,255,.98);
+    box-shadow: 0 20px 55px rgba(25,31,55,.16);
+    backdrop-filter: blur(14px);
+    animation: accountDropIn .16s ease-out;
+  }
+  .account-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 11px;
+    background: #f7f8fc;
+  }
+  .account-dropdown-header > div { min-width: 0; display: flex; flex-direction: column; }
+  .account-dropdown-header strong { font-size: 12px; }
+  .account-dropdown-header span:not(.user-avatar) {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: #7b8091; font-size: 10px; margin-top: 2px;
+  }
+  .account-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 11px;
+    border-radius: 10px;
+    color: #45495a;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+  }
+  .account-dropdown-item span { width: 20px; text-align: center; font-size: 15px; }
+  .account-dropdown-item:hover, .account-dropdown-item.active {
+    background: #eeedff; color: #635bff;
+  }
+  .account-dropdown-item.danger { color: #c2415a; margin-top: 3px; }
+  .account-dropdown-item.danger:hover { background: #fff0f2; color: #b4233f; }
+}
+@keyframes accountDropIn {
+  from { opacity: 0; transform: translateY(-5px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Dashboard resume cards: real A4 thumbnails ---------- */
+.resume-card-preview {
+  height: 310px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+.resume-card-preview-scale {
+  position: absolute !important;
+  top: 14px !important;
+  left: 50% !important;
+  width: 794px !important;
+  min-width: 794px !important;
+  height: 1123px !important;
+  transform: translateX(-50%) scale(.345) !important;
+  transform-origin: top center !important;
+}
+.resume-card-preview-scale .resume-print-area {
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+  min-height: 1123px !important;
+  margin: 0 !important;
+  transform: none !important;
+  box-shadow: 0 14px 35px rgba(20,24,40,.15) !important;
+}
+.resume-card-preview-overlay { z-index: 2; }
+
+@media (max-width: 620px) {
+  .resume-card-preview { height: 330px !important; }
+  .resume-card-preview-scale { transform: translateX(-50%) scale(.355) !important; }
+}
+
+/* ---------- Template gallery: full, readable A4 previews ---------- */
+.template-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 24px !important;
+}
+.template-card { min-width: 0; overflow: hidden; }
+.template-preview-button {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 !important;
+  border: 0 !important;
+  cursor: pointer;
+  overflow: hidden;
+}
+.template-real-preview {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 410px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(99,91,255,.10), transparent 35%),
+    #eef1f7 !important;
+}
+.template-real-preview .resume-print-area {
+  position: absolute !important;
+  top: 20px !important;
+  left: 50% !important;
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+  min-height: 1123px !important;
+  margin: 0 !important;
+  transform: translateX(-50%) scale(.345) !important;
+  transform-origin: top center !important;
+  box-shadow: 0 18px 42px rgba(20,24,40,.18) !important;
+}
+.template-card-body { min-width: 0; }
+.template-card-body p { min-height: 58px; }
+.template-color-row { flex-wrap: wrap; }
+.color-options { display: flex; flex-wrap: wrap; }
+
+@media (max-width: 1050px) {
+  .template-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 700px) {
+  .template-grid { grid-template-columns: 1fr !important; gap: 18px !important; }
+  .template-real-preview {
+    height: 430px !important;
+  }
+  .template-real-preview .resume-print-area {
+    top: 16px !important;
+    transform: translateX(-50%) scale(.375) !important;
+  }
+}
+@media (max-width: 380px) {
+  .template-real-preview { height: 415px !important; }
+  .template-real-preview .resume-print-area {
+    transform: translateX(-50%) scale(.35) !important;
+  }
+}
+
+/* ---------- Preview page: no duplicate/off-screen resume ---------- */
+.preview-page-content {
+  width: min(1180px, calc(100% - 40px));
+}
+.resume-mobile-stage {
+  position: relative !important;
+  width: min(794px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+.resume-mobile-document {
+  z-index: 1 !important;
+}
+.pdf-export-host {
+  position: fixed !important;
+  left: -10000px !important;
+  top: 0 !important;
+  z-index: -100 !important;
+  width: 794px !important;
+  height: auto !important;
+  min-height: 1123px !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  overflow: visible !important;
+}
+.pdf-export-host > div,
+.pdf-export-host .resume-print-area {
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+}
+@media (max-width: 850px) {
+  .resume-mobile-stage {
+    width: var(--resume-stage-width) !important;
+    max-width: var(--resume-stage-width) !important;
+    height: var(--resume-stage-height) !important;
+    min-height: var(--resume-stage-height) !important;
+  }
+}
+@media (max-width: 700px) {
+  .preview-page-content {
+    width: calc(100% - 20px) !important;
+    padding-top: 18px !important;
+  }
+  .preview-toolbar {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin-bottom: 16px !important;
+  }
+  .preview-title { font-size: 25px !important; }
+  .preview-subtitle { line-height: 1.55; }
+  .resume-mobile-stage { margin-left: auto !important; margin-right: auto !important; }
+}
+
+/* ---------- General mobile polish ---------- */
+html, body, #root { max-width: 100%; overflow-x: hidden; }
+button, input, textarea, select { max-width: 100%; }
+img { max-width: 100%; }
+@media (max-width: 700px) {
+  .dashboard-page { padding-top: 28px !important; }
+  .dashboard-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .dashboard-hero h1 {
+    font-size: clamp(32px, 10vw, 40px) !important;
+    line-height: 1.05;
+  }
+  .create-button { width: 100%; }
+  .dashboard-stats { grid-template-columns: 1fr !important; }
+  .resume-grid { grid-template-columns: 1fr !important; }
+  .resume-card { width: 100%; }
+  .resume-card-actions { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 430px) {
+  .resume-card-actions { grid-template-columns: 1fr; }
+  .resume-card-actions a { width: 100%; }
+}
