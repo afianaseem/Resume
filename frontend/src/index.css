@@ -4016,21 +4016,30 @@ button:disabled {
 
 .resume-inline-add:hover { background: rgba(109,61,245,.1); }
 
-/* Never let the PDF renderer inherit mobile scaling or clip long resumes. */
+/* =========================================================
+   PDF EXPORT RENDERER
+   =========================================================
+   Keep the renderer in the DOM and fully rendered.
+   Do NOT use display:none, visibility:hidden, opacity:0,
+   or z-index:-1 because html2canvas can capture a blank
+   document in those situations.
+*/
 .pdf-export-host {
-  position: absolute;
-  left: 0;
+  position: fixed;
+  left: -10000px;
   top: 0;
-  z-index: -1;
   width: 210mm;
   min-height: 297mm;
-  background: #fff;
+  z-index: 1;
+  background: #ffffff;
   overflow: visible;
   pointer-events: none;
 }
 
-.pdf-export-host > div {
+.pdf-export-document {
   width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
   overflow: visible;
 }
 
@@ -4052,7 +4061,9 @@ button:disabled {
   cursor: default !important;
 }
 
-.pdf-export-host .resume-inline-add { display: none !important; }
+.pdf-export-host .resume-inline-add {
+  display: none !important;
+}
 
 /* Mobile admin: tabs scroll instead of wrapping/colliding; tables become cards. */
 @media (max-width: 760px) {
