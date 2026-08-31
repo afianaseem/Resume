@@ -9,16 +9,21 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const isActive = (path) => location.pathname === path;
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
-  const initials =
-    user?.name
-      ?.split(" ")
-      .filter(Boolean)
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "U";
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, []);
+
+  if (!user) return null;
 
   const handleLogout = () => {
     setMenuOpen(false);
@@ -26,51 +31,41 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  useEffect(() => {
-    const onPointerDown = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setMenuOpen(false);
-      }
-    };
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") setMenuOpen(false);
-    };
-
-    document.addEventListener("mousedown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, []);
-
-  useEffect(() => setMenuOpen(false), [location.pathname]);
-
-  if (!user) return null;
+  const isActive = (path) => location.pathname === path;
+  const initials =
+    user.name
+      ?.split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "U";
 
   return (
     <header className="navbar no-print">
       <div className="navbar-inner">
-        <Link to={user.is_admin ? "/admin" : "/dashboard"} className="navbar-brand" aria-label="ResumeForge">
+        <Link to="/dashboard" className="navbar-brand" aria-label="ResumeForge dashboard">
           <span className="brand-mark">R</span>
           <span>Resume<span className="brand-accent">Forge</span></span>
         </Link>
 
-        {/* Desktop navigation. It is completely hidden on mobile. */}
-        <nav className="navbar-links navbar-desktop-links" aria-label="Main navigation">
+        <nav className="navbar-links desktop-navbar-links" aria-label="Main navigation">
           {user.is_admin ? (
             <Link to="/admin" className={`navbar-link ${isActive("/admin") ? "active" : ""}`}>
-              <span className="nav-icon">▦</span> Admin Dashboard
+              <span className="nav-icon">▦</span>
+              Admin Dashboard
             </Link>
           ) : (
-            <>
-              <Link to="/dashboard" className={`navbar-link ${isActive("/dashboard") ? "active" : ""}`}>
-                <span className="nav-icon">⌂</span> Dashboard
-              </Link>
-              <Link to="/profile" className={`navbar-link ${isActive("/profile") ? "active" : ""}`}>
-                <span className="nav-icon">◉</span> Profile
-              </Link>
-            </>
+            <Link to="/dashboard" className={`navbar-link ${isActive("/dashboard") ? "active" : ""}`}>
+              <span className="nav-icon">⌂</span>
+              Dashboard
+            </Link>
+          )}
+
+          {!user.is_admin && (
+            <Link to="/profile" className={`navbar-link ${isActive("/profile") ? "active" : ""}`}>
+              <span className="nav-icon">◉</span>
+              Profile
+            </Link>
           )}
 
           <div className="navbar-divider" />
@@ -88,73 +83,48 @@ export default function Navbar() {
           </button>
         </nav>
 
-        {/* Mobile navigation: this is the ONLY navigation control shown on phones. */}
-        <div className="mobile-nav" ref={menuRef}>
+        <div className="mobile-menu-wrap" ref={menuRef}>
           <button
             type="button"
             className={`mobile-menu-button ${menuOpen ? "open" : ""}`}
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
-            aria-haspopup="menu"
-            aria-label="Open navigation menu"
+            aria-controls="mobile-navigation-menu"
           >
-            <span className="mobile-menu-icon" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </span>
-            <span className="mobile-menu-label">Menu</span>
-            <span className="menu-chevron" aria-hidden="true">⌄</span>
+            <span className="mobile-menu-icon" aria-hidden="true"><i /><i /><i /></span>
+            <span>Menu</span>
           </button>
 
           {menuOpen && (
-            <div className="mobile-menu-dropdown" role="menu">
-              <div className="mobile-menu-user">
-                <div className="mobile-menu-avatar">{initials}</div>
-                <div className="mobile-menu-user-copy">
+            <div className="mobile-dropdown" id="mobile-navigation-menu">
+              <div className="mobile-user-summary">
+                <div className="user-avatar">{initials}</div>
+                <div>
                   <strong>{user.name || "User"}</strong>
                   <span>{user.email}</span>
                 </div>
               </div>
 
-              <div className="mobile-menu-divider" />
+              <div className="mobile-dropdown-divider" />
 
               {user.is_admin ? (
-                <Link
-                  to="/admin"
-                  className={`mobile-menu-item ${isActive("/admin") ? "active" : ""}`}
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <span className="mobile-menu-item-icon">▦</span>
-                  <span>Admin Dashboard</span>
+                <Link to="/admin" className={`mobile-dropdown-link ${isActive("/admin") ? "active" : ""}`}>
+                  <span>▦</span> Admin Dashboard
                 </Link>
               ) : (
-                <>
-                  <Link
-                    to="/dashboard"
-                    className={`mobile-menu-item ${isActive("/dashboard") ? "active" : ""}`}
-                    role="menuitem"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <span className="mobile-menu-item-icon">⌂</span>
-                    <span>Dashboard</span>
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className={`mobile-menu-item ${isActive("/profile") ? "active" : ""}`}
-                    role="menuitem"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    <span className="mobile-menu-item-icon">◉</span>
-                    <span>Profile</span>
-                  </Link>
-                </>
+                <Link to="/dashboard" className={`mobile-dropdown-link ${isActive("/dashboard") ? "active" : ""}`}>
+                  <span>⌂</span> Dashboard
+                </Link>
               )}
 
-              <button type="button" className="mobile-menu-item mobile-menu-logout" role="menuitem" onClick={handleLogout}>
-                <span className="mobile-menu-item-icon">↪</span>
-                <span>Log out</span>
+              {!user.is_admin && (
+                <Link to="/profile" className={`mobile-dropdown-link ${isActive("/profile") ? "active" : ""}`}>
+                  <span>◉</span> Profile
+                </Link>
+              )}
+
+              <button type="button" className="mobile-dropdown-link mobile-logout" onClick={handleLogout}>
+                <span>↪</span> Log out
               </button>
             </div>
           )}
