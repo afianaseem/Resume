@@ -89,16 +89,12 @@ function withDummyData(data) {
     data?.skills?.length ||
     data?.projects?.length;
 
-  if (hasContent) {
-    return data;
-  }
+  if (hasContent) return data;
 
   return {
     ...data,
     ...DUMMY_RESUME_DATA,
-    personal_info: {
-      ...DUMMY_RESUME_DATA.personal_info,
-    },
+    personal_info: { ...DUMMY_RESUME_DATA.personal_info },
     education: [...DUMMY_RESUME_DATA.education],
     experience: [...DUMMY_RESUME_DATA.experience],
     skills: [...DUMMY_RESUME_DATA.skills],
@@ -107,6 +103,10 @@ function withDummyData(data) {
     _dummyPreview: true,
   };
 }
+
+/* =========================================================
+   SHARE MODAL
+========================================================= */
 
 function ShareModal({ resumeName, onClose, onSend }) {
   const [email, setEmail] = useState("");
@@ -176,11 +176,7 @@ function ShareModal({ resumeName, onClose, onSend }) {
               <strong>{resumeName}</strong> has been emailed to {email}.
             </p>
 
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={onClose}
-            >
+            <button type="button" className="btn-primary" onClick={onClose}>
               Done
             </button>
           </div>
@@ -188,12 +184,9 @@ function ShareModal({ resumeName, onClose, onSend }) {
           <form onSubmit={handleSubmit}>
             <h3>Share via email</h3>
 
-            <p
-              className="text-muted small"
-              style={{ marginTop: 4 }}
-            >
-              We'll email a PDF copy of{" "}
-              <strong>{resumeName}</strong> to the address below.
+            <p className="text-muted small" style={{ marginTop: 4 }}>
+              We'll email a PDF copy of <strong>{resumeName}</strong> to the
+              address below.
             </p>
 
             {error && (
@@ -204,8 +197,7 @@ function ShareModal({ resumeName, onClose, onSend }) {
             )}
 
             <label className="field-label">
-              Recipient email{" "}
-              <span className="required-mark">*</span>
+              Recipient email <span className="required-mark">*</span>
 
               <input
                 type="email"
@@ -252,94 +244,58 @@ function ShareModal({ resumeName, onClose, onSend }) {
   );
 }
 
-/*
- * Wait until fonts and images are ready.
- *
- * This is important because html2canvas can otherwise capture the
- * document before the fonts/profile image/template assets have loaded.
- */
-async function waitForResumeAssets(element) {
-  if (!element) return;
-
-  if (document.fonts?.ready) {
-    try {
-      await document.fonts.ready;
-    } catch {
-      // Continue even if the browser does not support document.fonts.
-    }
-  }
-
-  const images = Array.from(element.querySelectorAll("img"));
-
-  if (!images.length) {
-    return;
-  }
-
-  await Promise.all(
-    images.map(
-      (img) =>
-        new Promise((resolve) => {
-          if (img.complete) {
-            resolve();
-            return;
-          }
-
-          const done = () => {
-            img.removeEventListener("load", done);
-            img.removeEventListener("error", done);
-            resolve();
-          };
-
-          img.addEventListener("load", done);
-          img.addEventListener("error", done);
-
-          setTimeout(done, 5000);
-        })
-    )
-  );
-}
+/* =========================================================
+   PDF GENERATION
+========================================================= */
 
 /*
- * Render an A4 document into a PDF.
- *
- * IMPORTANT:
- * This function renders ONLY the dedicated PDF renderer.
- * It does not render the mobile preview.
- */
+  IMPORTANT:
+
+  The visible resume is rendered at exactly 794 CSS pixels wide,
+  which corresponds to A4 width.
+
+  We use a SECOND non-visible renderer for PDF generation.
+
+  It must NOT:
+  - use transform: scale()
+  - use display:none
+  - use visibility:hidden
+  - use opacity:0
+  - use z-index:-1
+
+  html2canvas needs the element to actually exist in the rendered
+  browser layout.
+
+  The CSS places it far outside the viewport instead.
+*/
+
 async function makePdfBlob(element) {
   if (!element) {
-    throw new Error("Resume PDF renderer is not ready.");
+    throw new Error("PDF renderer is not available.");
   }
 
-  /*
-   * Make sure the browser has completed layout before html2canvas
-   * starts taking the screenshot.
-   */
-  await new Promise((resolve) =>
-    requestAnimationFrame(() =>
-      requestAnimationFrame(resolve)
-    )
-  );
+  // Allow the browser to finish fonts/layout/images.
+  if (document.fonts?.ready) {
+    await document.fonts.ready;
+  }
 
-  await waitForResumeAssets(element);
+  await new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
 
-  const rect = element.getBoundingClientRect();
-
-  const width = Math.max(
-    794,
-    Math.ceil(element.scrollWidth || rect.width || 794)
-  );
+  const width = 794;
 
   const height = Math.max(
     1123,
-    Math.ceil(element.scrollHeight || rect.height || 1123)
+    element.scrollHeight || element.offsetHeight || 1123
   );
 
   /*
-   * html2canvas must receive a real, visible layout box.
-   * The CSS for .pdf-export-host therefore keeps this element
-   * rendered but moves it far outside the visible viewport.
-   */
+    html2canvas renders the exact same ResumeDocument component
+    used by the preview, but without the mobile transform.
+  */
   const canvas = await html2canvas(element, {
     scale: 2,
 
@@ -355,7 +311,7 @@ async function makePdfBlob(element) {
 
     height,
 
-    windowWidth: 794,
+    windowWidth: width,
 
     windowHeight: Math.max(1123, height),
 
@@ -366,13 +322,10 @@ async function makePdfBlob(element) {
     imageTimeout: 15000,
   });
 
-  if (!canvas || canvas.width < 10 || canvas.height < 10) {
-    throw new Error("The resume could not be rendered.");
+  if (!canvas.width || !canvas.height) {
+    throw new Error("The generated resume image is empty.");
   }
 
-  /*
-   * Create A4 PDF.
-   */
   const pdf = new jsPDF({
     orientation: "portrait",
     unit: "mm",
@@ -384,8 +337,11 @@ async function makePdfBlob(element) {
   const pageHeight = 297;
 
   /*
-   * Convert A4 height into pixels based on the captured canvas width.
-   */
+    Canvas width is 794 * scale.
+
+    Calculate the number of canvas pixels that fit on one
+    A4 page while keeping the exact aspect ratio.
+  */
   const pagePixelHeight = Math.floor(
     (canvas.width * pageHeight) / pageWidth
   );
@@ -419,7 +375,6 @@ async function makePdfBlob(element) {
     }
 
     context.fillStyle = "#ffffff";
-
     context.fillRect(
       0,
       0,
@@ -446,8 +401,13 @@ async function makePdfBlob(element) {
     const imageHeight =
       (sourceHeight * pageWidth) / canvas.width;
 
+    const imageData = pageCanvas.toDataURL(
+      "image/jpeg",
+      0.96
+    );
+
     pdf.addImage(
-      pageCanvas.toDataURL("image/jpeg", 0.96),
+      imageData,
       "JPEG",
       0,
       0,
@@ -465,15 +425,17 @@ function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onloadend = () => {
-      resolve(reader.result);
-    };
+    reader.onloadend = () => resolve(reader.result);
 
     reader.onerror = reject;
 
     reader.readAsDataURL(blob);
   });
 }
+
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
 
 export default function ResumePreview() {
   const { id } = useParams();
@@ -494,22 +456,13 @@ export default function ResumePreview() {
   const [resumeStageHeight, setResumeStageHeight] =
     useState(1123);
 
-  /*
-   * Visible mobile/desktop preview.
-   */
+  const pdfExportRef = useRef(null);
   const screenResumeRef = useRef(null);
 
-  /*
-   * Separate renderer used ONLY for PDF/email.
-   */
-  const pdfExportRef = useRef(null);
+  /* =======================================================
+     RESPONSIVE SCALE
+  ======================================================= */
 
-  /*
-   * Calculate responsive scale.
-   *
-   * The actual resume remains 794px wide.
-   * On smaller screens only the visual transform changes.
-   */
   useEffect(() => {
     const updateScale = () => {
       const viewportWidth =
@@ -538,11 +491,10 @@ export default function ResumePreview() {
     };
   }, []);
 
-  /*
-   * Measure the real A4 document height.
-   *
-   * This keeps the mobile stage from cutting off long resumes.
-   */
+  /* =======================================================
+     MEASURE SCREEN RESUME
+  ======================================================= */
+
   useEffect(() => {
     const element = screenResumeRef.current;
 
@@ -561,24 +513,18 @@ export default function ResumePreview() {
       );
     };
 
-    const frame =
-      requestAnimationFrame(measure);
+    const frame = requestAnimationFrame(measure);
 
-    let observer = null;
+    const observer = new ResizeObserver(measure);
 
-    if (typeof ResizeObserver !== "undefined") {
-      observer = new ResizeObserver(measure);
-      observer.observe(element);
-    }
+    observer.observe(element);
 
     window.addEventListener("resize", measure);
 
     return () => {
       cancelAnimationFrame(frame);
 
-      if (observer) {
-        observer.disconnect();
-      }
+      observer.disconnect();
 
       window.removeEventListener(
         "resize",
@@ -587,29 +533,34 @@ export default function ResumePreview() {
     };
   }, [resume, resumeScale]);
 
-  /*
-   * Load resume.
-   */
+  /* =======================================================
+     LOAD RESUME
+  ======================================================= */
+
   useEffect(() => {
     let mounted = true;
 
     getResume(id)
       .then((data) => {
-        if (!mounted) return;
-
-        setResume(withDummyData(data));
-        setError("");
+        if (mounted) {
+          setResume(withDummyData(data));
+          setError("");
+        }
       })
       .catch(() => {
-        if (!mounted) return;
-
-        setError("Could not load this resume.");
+        if (mounted) {
+          setError("Could not load this resume.");
+        }
       });
 
     return () => {
       mounted = false;
     };
   }, [id]);
+
+  /* =======================================================
+     LOADING / ERROR
+  ======================================================= */
 
   if (error) {
     return (
@@ -655,18 +606,20 @@ export default function ResumePreview() {
   const templateId =
     resume.template || "classic";
 
-  /*
-   * Handle inline changes made directly on the resume.
-   */
+  /* =======================================================
+     RESUME EDITING
+  ======================================================= */
+
   const handleResumeChange = (next) => {
     setResume(next);
     setDirty(true);
     setSaveMessage("");
   };
 
-  /*
-   * Save inline changes.
-   */
+  /* =======================================================
+     SAVE
+  ======================================================= */
+
   const saveInlineChanges = async () => {
     setSaving(true);
     setSaveMessage("");
@@ -690,9 +643,8 @@ export default function ResumePreview() {
         experience:
           resume.experience || [],
 
-        skills: (resume.skills || []).filter(
-          Boolean
-        ),
+        skills:
+          (resume.skills || []).filter(Boolean),
 
         projects:
           resume.projects || [],
@@ -713,7 +665,9 @@ export default function ResumePreview() {
       );
 
       setResume(saved);
+
       setDirty(false);
+
       setSaveMessage("Saved");
     } catch (e) {
       setSaveMessage(
@@ -725,9 +679,10 @@ export default function ResumePreview() {
     }
   };
 
-  /*
-   * Create the PDF from the dedicated PDF renderer.
-   */
+  /* =======================================================
+     CREATE PDF
+  ======================================================= */
+
   const createPdf = async () => {
     const element =
       pdfExportRef.current;
@@ -739,13 +694,9 @@ export default function ResumePreview() {
     }
 
     /*
-     * Explicitly force a browser layout calculation.
-     *
-     * This is important because the PDF renderer is outside
-     * the visible mobile preview.
-     */
-    element.getBoundingClientRect();
-
+      Make sure the exported document is using the
+      latest React state.
+    */
     await new Promise((resolve) =>
       requestAnimationFrame(() =>
         requestAnimationFrame(resolve)
@@ -755,9 +706,10 @@ export default function ResumePreview() {
     return makePdfBlob(element);
   };
 
-  /*
-   * Download PDF.
-   */
+  /* =======================================================
+     DOWNLOAD PDF
+  ======================================================= */
+
   const downloadPdf = async () => {
     setPdfBusy(true);
     setPdfError("");
@@ -768,11 +720,8 @@ export default function ResumePreview() {
       const url =
         URL.createObjectURL(blob);
 
-      const filename =
-        (
-          resume.name ||
-          "resume"
-        )
+      const safeName =
+        (resume.name || "resume")
           .replace(
             /[^a-z0-9 _-]/gi,
             ""
@@ -783,7 +732,9 @@ export default function ResumePreview() {
         document.createElement("a");
 
       a.href = url;
-      a.download = `${filename}.pdf`;
+
+      a.download =
+        `${safeName}.pdf`;
 
       document.body.appendChild(a);
 
@@ -791,13 +742,11 @@ export default function ResumePreview() {
 
       a.remove();
 
-      /*
-       * Give the browser a moment before
-       * destroying the object URL.
-       */
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 1000);
+      setTimeout(
+        () =>
+          URL.revokeObjectURL(url),
+        1000
+      );
     } catch (e) {
       console.error(
         "PDF generation error:",
@@ -812,20 +761,59 @@ export default function ResumePreview() {
     }
   };
 
+  /* =======================================================
+     SHARE
+  ======================================================= */
+
+  const handleSendResume = async (
+    email,
+    message
+  ) => {
+    /*
+      IMPORTANT:
+      The PDF is generated from the SAME ResumeDocument
+      content used by the preview.
+
+      Therefore the attachment contains:
+      - same template
+      - same color
+      - same profile image
+      - same text
+      - same dates
+      - same sections
+      - same ordering
+    */
+
+    const blob = await createPdf();
+
+    const pdfBase64 =
+      await blobToBase64(blob);
+
+    return shareResume(
+      id,
+      email,
+      message,
+      pdfBase64
+    );
+  };
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
     <div className="app-shell preview-page">
-      {/*
-       * Navbar is not printed.
-       */}
+
+      {/* NAVBAR */}
       <div className="no-print">
         <Navbar />
       </div>
 
       <main className="page-content preview-page-content">
-        {/*
-         * Screen-only toolbar.
-         */}
+
+        {/* TOOLBAR */}
         <div className="preview-toolbar no-print">
+
           <div>
             <Link
               to="/dashboard"
@@ -850,12 +838,17 @@ export default function ResumePreview() {
           </div>
 
           <div className="header-actions">
+
             <button
               type="button"
               className={`btn-secondary ${
-                dirty ? "save-needed" : ""
+                dirty
+                  ? "save-needed"
+                  : ""
               }`}
-              onClick={saveInlineChanges}
+              onClick={
+                saveInlineChanges
+              }
               disabled={
                 !dirty || saving
               }
@@ -880,16 +873,20 @@ export default function ResumePreview() {
             <button
               type="button"
               className="btn-primary"
-              onClick={downloadPdf}
+              onClick={
+                downloadPdf
+              }
               disabled={pdfBusy}
             >
               {pdfBusy
                 ? "Generating PDF…"
                 : "⤓ Download PDF"}
             </button>
+
           </div>
         </div>
 
+        {/* PDF ERROR */}
         {pdfError && (
           <div
             className="form-error no-print"
@@ -900,6 +897,7 @@ export default function ResumePreview() {
           </div>
         )}
 
+        {/* SAVE MESSAGE */}
         {saveMessage && (
           <div
             className={`inline-save-message no-print ${
@@ -913,6 +911,7 @@ export default function ResumePreview() {
           </div>
         )}
 
+        {/* DUMMY DATA MESSAGE */}
         {resume._dummyPreview && (
           <div className="dummy-hint no-print">
             <strong>
@@ -927,14 +926,12 @@ export default function ResumePreview() {
           </div>
         )}
 
-        {/*
-         * ============================================================
-         * VISIBLE RESPONSIVE RESUME
-         * ============================================================
-         *
-         * This is ONLY for the user interface.
-         * It is scaled on mobile.
-         */}
+        {/* =================================================
+            VISIBLE MOBILE/RESPONSIVE PREVIEW
+
+            This is the resume the user sees.
+        ================================================== */}
+
         <div
           className="resume-mobile-stage"
           style={{
@@ -958,7 +955,9 @@ export default function ResumePreview() {
           >
             <ResumeDocument
               resume={resume}
-              templateId={templateId}
+              templateId={
+                templateId
+              }
               editable
               onChange={
                 handleResumeChange
@@ -967,24 +966,18 @@ export default function ResumePreview() {
           </div>
         </div>
 
-        {/*
-         * ============================================================
-         * DEDICATED PDF RENDERER
-         * ============================================================
-         *
-         * IMPORTANT:
-         *
-         * This is NOT display:none.
-         * It is NOT opacity:0.
-         * It is NOT z-index:-1.
-         *
-         * It remains a real rendered DOM element but is positioned
-         * far outside the viewport.
-         *
-         * html2canvas can therefore render it correctly.
-         *
-         * This fixes the blank PDF/email problem.
-         */}
+        {/* =================================================
+            PDF EXPORT RENDERER
+
+            IMPORTANT:
+            This is NOT display:none.
+            It is NOT opacity:0.
+            It is NOT z-index:-1.
+
+            It is simply positioned far outside the
+            visible viewport so html2canvas can render it.
+        ================================================== */}
+
         <div
           className="pdf-export-host"
           aria-hidden="true"
@@ -995,55 +988,31 @@ export default function ResumePreview() {
           >
             <ResumeDocument
               resume={resume}
-              templateId={templateId}
+              templateId={
+                templateId
+              }
+              editable={false}
             />
           </div>
         </div>
+
       </main>
 
+      {/* SHARE MODAL */}
       {showShare && (
         <ShareModal
-          resumeName={resume.name}
+          resumeName={
+            resume.name
+          }
           onClose={() =>
             setShowShare(false)
           }
-          onSend={async (
-            email,
-            message
-          ) => {
-            /*
-             * Generate the exact same PDF used
-             * by the Download PDF button.
-             */
-            const blob =
-              await createPdf();
-
-            if (
-              !blob ||
-              blob.size === 0
-            ) {
-              throw new Error(
-                "Generated PDF is empty."
-              );
-            }
-
-            const pdfBase64 =
-              await blobToBase64(
-                blob
-              );
-
-            /*
-             * Send the generated PDF to the backend.
-             */
-            return shareResume(
-              id,
-              email,
-              message,
-              pdfBase64
-            );
-          }}
+          onSend={
+            handleSendResume
+          }
         />
       )}
+
     </div>
   );
 }
