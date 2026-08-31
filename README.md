@@ -136,18 +136,7 @@ Open **http://localhost:5173** in your browser. You should see the login page.
 
 ---
 
-## 7. Common issues
-
-| Problem | Fix |
-|---|---|
-| `ModuleNotFoundError` when starting backend | You forgot to activate the venv, or `pip install -r requirements.txt` failed — re-run it. |
-| Frontend shows network errors | Make sure the backend terminal is still running on port 8000. |
-| CORS error in browser console | Check `backend/.env` — `CORS_ORIGINS` must include `http://localhost:5173`. |
-| "Could not validate credentials" | Your JWT expired (default 24h) or `SECRET_KEY` changed after you logged in — just log in again. |
-
----
-
-## 8. Admin setup
+## 7. Admin setup
 
 Set these in `backend/.env` before starting the backend:
 
@@ -158,11 +147,11 @@ ADMIN_PASSWORD=UseARealStrongPassword123!
 
 On startup, the backend creates that account if it does not exist, or promotes the existing account with that email to administrator. Administrator authorization is enforced by the API; hiding the frontend link is not the security boundary. Deleting a user also deletes that user's resumes. Deleting a resume from Admin Dashboard removes it from the owner's dashboard too.
 
-## 9. Email + PDF
+## 8. Email + PDF
 
 The Share button generates the PDF from the same rendered resume document shown in Preview, then sends that PDF to the recipient. SMTP credentials are still required for real delivery. Gmail can be used with a free App Password. If no browser-generated PDF is supplied, the backend keeps a ReportLab fallback renderer.
 
-## 10. Deploying for free (optional, once you're ready)
+## 9. Deploying for free (optional, once you're ready)
 
 You don't need this to develop locally, but if you want a live link to share:
 
@@ -172,7 +161,7 @@ You don't need this to develop locally, but if you want a live link to share:
 
 ---
 
-## 11. Included in this version
+## 10. Included in this version
 
 - Six resume templates: Classic, Modern, Minimal, Bold, ATS Friendly, and Sidebar.
 - Four accent colors per template: Violet, Blue, Emerald, and Rose.
