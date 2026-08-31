@@ -5222,3 +5222,616 @@ body {
     line-height: 16px !important;
   }
 }
+
+/* =========================================================
+   PROFESSIONAL FULL-SCREEN LOADING SCREEN
+   ========================================================= */
+
+.page-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(108, 99, 255, 0.12),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(99, 91, 255, 0.10),
+      transparent 35%
+    ),
+    #f7f8fc;
+
+  box-sizing: border-box;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+
+/* Make sure every child uses border-box */
+
+.page-loading *,
+.page-loading *::before,
+.page-loading *::after {
+  box-sizing: border-box;
+}
+
+
+/* ---------------------------------------------------------
+   Background decoration
+--------------------------------------------------------- */
+
+.page-loading-background {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+  overflow: hidden;
+}
+
+
+.loading-orb {
+  position: absolute;
+
+  border-radius: 50%;
+
+  filter: blur(1px);
+
+  opacity: 0.65;
+
+  animation:
+    loadingFloat 7s ease-in-out infinite;
+}
+
+
+.loading-orb-one {
+  width: 260px;
+  height: 260px;
+
+  top: -100px;
+  left: -80px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(108, 99, 255, 0.14),
+      rgba(108, 99, 255, 0)
+    );
+}
+
+
+.loading-orb-two {
+  width: 320px;
+  height: 320px;
+
+  right: -120px;
+  bottom: -120px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(99, 91, 255, 0.12),
+      rgba(99, 91, 255, 0)
+    );
+
+  animation-delay: -3s;
+}
+
+
+@keyframes loadingFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(0, -18px, 0);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   Main content
+--------------------------------------------------------- */
+
+.page-loading-content {
+  position: relative;
+  z-index: 2;
+
+  width: min(92vw, 440px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+
+  animation: loadingAppear 0.45s ease-out both;
+}
+
+
+@keyframes loadingAppear {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
+/* ---------------------------------------------------------
+   ResumeForge branding
+--------------------------------------------------------- */
+
+.page-loading-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-bottom: 22px;
+}
+
+
+.page-loading-logo {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 11px;
+
+  color: white;
+
+  font-size: 19px;
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6c63ff 0%,
+      #5148e8 100%
+    );
+
+  box-shadow:
+    0 8px 22px rgba(99, 91, 255, 0.25);
+
+  letter-spacing: -0.5px;
+}
+
+
+.page-loading-brand-name {
+  color: #17152c;
+
+  font-size: 23px;
+  font-weight: 800;
+
+  letter-spacing: -0.7px;
+}
+
+
+.page-loading-brand-name span {
+  color: #635bff;
+}
+
+
+/* ---------------------------------------------------------
+   Loading card
+--------------------------------------------------------- */
+
+.page-loading-card {
+  width: 100%;
+
+  padding: 36px 34px 31px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border: 1px solid rgba(226, 229, 238, 0.95);
+
+  border-radius: 24px;
+
+  background:
+    rgba(255, 255, 255, 0.94);
+
+  box-shadow:
+    0 30px 80px rgba(25, 31, 55, 0.10),
+    0 8px 30px rgba(25, 31, 55, 0.05);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+
+/* ---------------------------------------------------------
+   Loader
+--------------------------------------------------------- */
+
+.professional-loader {
+  position: relative;
+
+  width: 76px;
+  height: 76px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 24px;
+}
+
+
+.loader-ring {
+  position: absolute;
+  inset: 0;
+
+  width: 76px;
+  height: 76px;
+
+  border-radius: 50%;
+
+  border: 4px solid #ececf5;
+
+  border-top-color: #635bff;
+  border-right-color: #827cff;
+
+  animation:
+    professionalSpin 1s linear infinite;
+}
+
+
+.loader-ring::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 8px;
+
+  border-radius: 50%;
+
+  border: 2px solid transparent;
+
+  border-bottom-color: rgba(99, 91, 255, 0.22);
+
+  animation:
+    professionalSpinReverse 1.5s linear infinite;
+}
+
+
+@keyframes professionalSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes professionalSpinReverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+
+.loader-logo {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 13px;
+
+  color: white;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6c63ff,
+      #5148e8
+    );
+
+  box-shadow:
+    0 7px 20px rgba(99, 91, 255, 0.25);
+}
+
+
+/* ---------------------------------------------------------
+   Loading text
+--------------------------------------------------------- */
+
+.page-loading-text {
+  width: 100%;
+
+  text-align: center;
+}
+
+
+.page-loading-text h2 {
+  margin: 0 0 7px;
+
+  color: #202238;
+
+  font-size: 18px;
+  line-height: 1.4;
+
+  font-weight: 750;
+
+  letter-spacing: -0.2px;
+}
+
+
+.page-loading-text p {
+  margin: 0;
+
+  color: #85899a;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+
+/* ---------------------------------------------------------
+   Animated progress line
+--------------------------------------------------------- */
+
+.loading-progress {
+  position: relative;
+
+  width: 100%;
+  height: 4px;
+
+  margin-top: 25px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #eeeeF6;
+}
+
+
+.loading-progress span {
+  position: absolute;
+
+  top: 0;
+  left: -35%;
+
+  width: 35%;
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      #635bff,
+      #8179ff
+    );
+
+  animation:
+    loadingProgress 1.45s ease-in-out infinite;
+}
+
+
+@keyframes loadingProgress {
+  0% {
+    left: -35%;
+  }
+
+  50% {
+    left: 65%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   Footer text
+--------------------------------------------------------- */
+
+.page-loading-footer {
+  margin-top: 19px;
+
+  color: #9a9dac;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  letter-spacing: 0.1px;
+}
+
+
+/* =========================================================
+   MOBILE LOADING SCREEN
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .page-loading {
+    min-height: 100dvh;
+    padding:
+      20px
+      max(20px, env(safe-area-inset-right))
+      20px
+      max(20px, env(safe-area-inset-left));
+  }
+
+
+  .page-loading-content {
+    width: min(100%, 390px);
+  }
+
+
+  .page-loading-brand {
+    margin-bottom: 18px;
+  }
+
+
+  .page-loading-logo {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    font-size: 17px;
+  }
+
+
+  .page-loading-brand-name {
+    font-size: 20px;
+  }
+
+
+  .page-loading-card {
+    padding: 30px 22px 25px;
+
+    border-radius: 20px;
+  }
+
+
+  .professional-loader {
+    width: 68px;
+    height: 68px;
+
+    margin-bottom: 21px;
+  }
+
+
+  .loader-ring {
+    width: 68px;
+    height: 68px;
+  }
+
+
+  .loader-logo {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 11px;
+
+    font-size: 18px;
+  }
+
+
+  .page-loading-text h2 {
+    font-size: 16px;
+  }
+
+
+  .page-loading-text p {
+    font-size: 12px;
+  }
+
+
+  .loading-progress {
+    margin-top: 21px;
+  }
+
+
+  .page-loading-footer {
+    font-size: 10px;
+
+    margin-top: 15px;
+  }
+
+
+  .loading-orb-one {
+    width: 180px;
+    height: 180px;
+
+    top: -70px;
+    left: -70px;
+  }
+
+
+  .loading-orb-two {
+    width: 220px;
+    height: 220px;
+
+    right: -90px;
+    bottom: -90px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .page-loading {
+    padding: 16px;
+  }
+
+
+  .page-loading-card {
+    padding: 26px 18px 22px;
+  }
+
+
+  .page-loading-brand-name {
+    font-size: 18px;
+  }
+
+
+  .page-loading-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+
+  .page-loading-text h2 {
+    font-size: 15px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .page-loading *,
+  .page-loading *::before,
+  .page-loading *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
