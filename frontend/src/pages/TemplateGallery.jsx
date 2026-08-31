@@ -102,7 +102,7 @@ export default function TemplateGallery() {
         <div className="template-gallery-header">
           <div>
             <Link to="/dashboard" className="back-link">← Back to dashboard</Link>
-            <span className="eyebrow">RESUME DESIGN</span>
+            <h2 className="eyebrow">RESUME DESIGN</h2>
             <h1 className="preview-title">Choose a template</h1>
             <p className="text-muted small">Pick a layout and accent color for <strong>{resume.name}</strong>. Your choice is used consistently in editing, preview, PDF and email.</p>
           </div>
