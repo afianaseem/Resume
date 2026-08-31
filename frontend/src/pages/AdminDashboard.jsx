@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import {
-  adminOverview,
-  adminUsers,
-  adminResumes,
+  adminData,
   adminDeleteResume,
   adminDeleteUser,
 } from "../api/resumes";
@@ -22,19 +20,16 @@ export default function AdminDashboard() {
 
   const load = async () => {
     try {
-      const [o, u, r] = await Promise.all([
-        adminOverview(),
-        adminUsers(),
-        adminResumes({
-          q: query,
-          from_date: fromDate,
-          to_date: toDate,
-        }),
-      ]);
+      // ONE request instead of three independent serverless requests.
+      const data = await adminData({
+        q: query,
+        from_date: fromDate,
+        to_date: toDate,
+      });
 
-      setOverview(o);
-      setUsers(u);
-      setResumes(r);
+      setOverview(data.overview);
+      setUsers(data.users);
+      setResumes(data.resumes);
       setError("");
     } catch (e) {
       setError(
