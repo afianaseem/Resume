@@ -470,7 +470,7 @@ export default function ResumePreview() {
         </div>
 
         <div className="pdf-export-host" aria-hidden="true">
-          <div ref={pdfExportRef}>
+          <div ref={pdfExportRef} className="pdf-export-document">
             <ResumeDocument resume={resume} templateId={templateId} />
           </div>
         </div>
@@ -486,3 +486,4 @@ export default function ResumePreview() {
     </div>
   );
 }
+
