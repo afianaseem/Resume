@@ -1,8 +1,8 @@
 import client from "./client";
 
-// ============================================================
-// USER RESUMES
-// ============================================================
+/* =========================================================
+   USER RESUMES
+   ========================================================= */
 
 export const listResumes = () =>
   client
@@ -32,6 +32,10 @@ export const deleteResume = (id) =>
   client.delete(`/resumes/${id}`);
 
 
+/* =========================================================
+   SHARE RESUME
+   ========================================================= */
+
 export const shareResume = (
   id,
   email,
@@ -47,21 +51,34 @@ export const shareResume = (
     .then((response) => response.data);
 
 
-// ============================================================
-// ADMIN
-// ============================================================
+/* =========================================================
+   ADMIN DASHBOARD
+   ========================================================= */
 
 /*
  * IMPORTANT:
  *
- * AdminDashboard uses this function to load:
+ * This is the optimized admin endpoint.
  *
- * - overview
- * - users
- * - resumes
+ * Instead of:
  *
- * in ONE API request instead of making three requests.
+ *   GET /admin/overview
+ *   GET /admin/users
+ *   GET /admin/resumes
+ *
+ * the admin dashboard now makes ONE request:
+ *
+ *   GET /admin/data
+ *
+ * It returns:
+ *
+ *   {
+ *     overview,
+ *     users,
+ *     resumes
+ *   }
  */
+
 export const adminData = (params = {}) =>
   client
     .get("/admin/data", {
@@ -70,8 +87,14 @@ export const adminData = (params = {}) =>
     .then((response) => response.data);
 
 
-// Keep these functions because other parts of the
-// application may still use them.
+/* =========================================================
+   OLD ADMIN ENDPOINTS
+   =========================================================
+   
+   Keep these because other parts of the application may
+   still use them.
+*/
+
 export const adminOverview = () =>
   client
     .get("/admin/overview")
@@ -92,6 +115,10 @@ export const adminResumes = (params = {}) =>
     .then((response) => response.data);
 
 
+/* =========================================================
+   ADMIN RESUME
+   ========================================================= */
+
 export const adminGetResume = (id) =>
   client
     .get(`/admin/resumes/${id}`)
@@ -101,6 +128,10 @@ export const adminGetResume = (id) =>
 export const adminDeleteResume = (id) =>
   client.delete(`/admin/resumes/${id}`);
 
+
+/* =========================================================
+   ADMIN USERS
+   ========================================================= */
 
 export const adminDeleteUser = (id) =>
   client.delete(`/admin/users/${id}`);
@@ -123,9 +154,9 @@ export const adminSetUserStatus = (
     .then((response) => response.data);
 
 
-// ============================================================
-// RESUME VERSIONS
-// ============================================================
+/* =========================================================
+   RESUME VERSIONS
+   ========================================================= */
 
 export const listResumeVersions = (id) =>
   client
@@ -160,6 +191,10 @@ export const restoreResumeVersion = (
     )
     .then((response) => response.data);
 
+
+/* =========================================================
+   DUPLICATE RESUME
+   ========================================================= */
 
 export const duplicateResume = (id) =>
   client
