@@ -158,7 +158,7 @@ You don't need this to develop locally, but if you want a live link to share:
 - **Backend:** [Render](https://render.com) or [Railway](https://railway.app) both have free tiers for small FastAPI apps. Point the start command at `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, and set `SECRET_KEY` and `CORS_ORIGINS` (your deployed frontend URL) as environment variables there.
 - **Frontend:** [Vercel](https://vercel.com) or [Netlify](https://netlify.com) — both free for personal projects. Set `VITE_API_URL` to your deployed backend URL as a build-time environment variable.
 - **Database:** Use hosted PostgreSQL in production (Neon, Supabase, Railway, Render, etc.). SQLite is supported for local development only.
-
+- **Our App:** Hosted PostgreSQL in production using [Supabase](https://supabase.com) as SQLite is supported for local development only. Deployed the full application Frontend and Backend both in [Vercel](https://vercel.com).
 ---
 
 ## 10. Included in this version
