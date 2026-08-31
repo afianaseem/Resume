@@ -14,70 +14,21 @@ const DUMMY_RESUME_DATA = {
     email: "ayesha.khan@example.com",
     phone: "+92 300 1234567",
     address: "Lahore, Pakistan",
-    summary:
-      "Product-focused software developer with 4+ years of experience building responsive web applications, improving user experiences, and collaborating with cross-functional teams.",
+    summary: "Product-focused software developer with 4+ years of experience building responsive web applications, improving user experiences, and collaborating with cross-functional teams.",
     profile_image: "",
   },
-
   education: [
-    {
-      degree: "BS Computer Science",
-      field: "",
-      school: "University of the Punjab",
-      start_date: "2017-09-01",
-      end_date: "2021-06-01",
-      current: false,
-      grade: "CGPA 3.7 / 4.0",
-    },
+    { degree: "BS Computer Science", field: "", school: "University of the Punjab", start_date: "2017-09-01", end_date: "2021-06-01", current: false, grade: "CGPA 3.7 / 4.0" },
   ],
-
   experience: [
-    {
-      role: "Frontend Developer",
-      company: "TechNova Solutions",
-      start_date: "2022-01-01",
-      end_date: "2026-05-01",
-      current: false,
-      description:
-        "Built responsive React applications, improved page performance by 35%, and worked with designers and backend engineers to deliver customer-facing features.",
-    },
-    {
-      role: "Junior Web Developer",
-      company: "Digital Works",
-      start_date: "2021-07-01",
-      end_date: "2021-12-01",
-      current: false,
-      description:
-        "Developed reusable UI components and maintained accessible, mobile-first interfaces for multiple client projects.",
-    },
+    { role: "Frontend Developer", company: "TechNova Solutions", start_date: "2022-01-01", end_date: "2026-05-01", current: false, description: "Built responsive React applications, improved page performance by 35%, and worked with designers and backend engineers to deliver customer-facing features." },
+    { role: "Junior Web Developer", company: "Digital Works", start_date: "2021-07-01", end_date: "2021-12-01", current: false, description: "Developed reusable UI components and maintained accessible, mobile-first interfaces for multiple client projects." },
   ],
-
-  skills: [
-    "React",
-    "JavaScript",
-    "TypeScript",
-    "HTML & CSS",
-    "REST APIs",
-    "Git",
-  ],
-
+  skills: ["React", "JavaScript", "TypeScript", "HTML & CSS", "REST APIs", "Git"],
   projects: [
-    {
-      title: "Resume Builder",
-      tech_stack: "React · FastAPI · PostgreSQL",
-      description:
-        "Created a responsive resume builder with live preview, reusable templates, and PDF export.",
-      link: "https://example.com",
-    },
+    { title: "Resume Builder", tech_stack: "React · FastAPI · PostgreSQL", description: "Created a responsive resume builder with live preview, reusable templates, and PDF export.", link: "https://example.com" },
   ],
-
-  section_order: [
-    "summary",
-    "experience",
-    "education",
-    "skills",
-    "projects",
-  ],
+  section_order: ["summary", "experience", "education", "skills", "projects"],
 };
 
 function withDummyData(data) {
@@ -90,7 +41,6 @@ function withDummyData(data) {
     data?.projects?.length;
 
   if (hasContent) return data;
-
   return {
     ...data,
     ...DUMMY_RESUME_DATA,
@@ -104,10 +54,6 @@ function withDummyData(data) {
   };
 }
 
-/* =========================================================
-   SHARE MODAL
-========================================================= */
-
 function ShareModal({ resumeName, onClose, onSend }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -120,21 +66,16 @@ function ShareModal({ resumeName, onClose, onSend }) {
     setError("");
 
     const trimmed = email.trim();
-
     if (!trimmed) {
       setError("Please enter an email address.");
       return;
     }
-
     if (!EMAIL_RE.test(trimmed)) {
-      setError(
-        "Please enter a complete email address, e.g. name@example.com"
-      );
+      setError("Please enter a complete email address, e.g. name@example.com");
       return;
     }
 
     setSending(true);
-
     try {
       await onSend(trimmed, message.trim());
       setSent(true);
@@ -169,13 +110,10 @@ function ShareModal({ resumeName, onClose, onSend }) {
         {sent ? (
           <div className="modal-success">
             <div className="modal-success-icon">✓</div>
-
             <h3>Sent!</h3>
-
             <p>
               <strong>{resumeName}</strong> has been emailed to {email}.
             </p>
-
             <button type="button" className="btn-primary" onClick={onClose}>
               Done
             </button>
@@ -183,7 +121,6 @@ function ShareModal({ resumeName, onClose, onSend }) {
         ) : (
           <form onSubmit={handleSubmit}>
             <h3>Share via email</h3>
-
             <p className="text-muted small" style={{ marginTop: 4 }}>
               We'll email a PDF copy of <strong>{resumeName}</strong> to the
               address below.
@@ -198,7 +135,6 @@ function ShareModal({ resumeName, onClose, onSend }) {
 
             <label className="field-label">
               Recipient email <span className="required-mark">*</span>
-
               <input
                 type="email"
                 value={email}
@@ -211,7 +147,6 @@ function ShareModal({ resumeName, onClose, onSend }) {
 
             <label className="field-label">
               Add a note (optional)
-
               <textarea
                 rows={3}
                 value={message}
@@ -228,7 +163,6 @@ function ShareModal({ resumeName, onClose, onSend }) {
               >
                 Cancel
               </button>
-
               <button
                 type="submit"
                 className="btn-primary"
@@ -244,298 +178,110 @@ function ShareModal({ resumeName, onClose, onSend }) {
   );
 }
 
-/* =========================================================
-   PDF GENERATION
-========================================================= */
-
-/*
-  IMPORTANT:
-
-  The visible resume is rendered at exactly 794 CSS pixels wide,
-  which corresponds to A4 width.
-
-  We use a SECOND non-visible renderer for PDF generation.
-
-  It must NOT:
-  - use transform: scale()
-  - use display:none
-  - use visibility:hidden
-  - use opacity:0
-  - use z-index:-1
-
-  html2canvas needs the element to actually exist in the rendered
-  browser layout.
-
-  The CSS places it far outside the viewport instead.
-*/
-
 async function makePdfBlob(element) {
-  if (!element) {
-    throw new Error("PDF renderer is not available.");
-  }
-
-  // Allow the browser to finish fonts/layout/images.
-  if (document.fonts?.ready) {
-    await document.fonts.ready;
-  }
-
-  await new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(resolve);
-    });
-  });
-
-  const width = 794;
-
-  const height = Math.max(
-    1123,
-    element.scrollHeight || element.offsetHeight || 1123
-  );
-
-  /*
-    html2canvas renders the exact same ResumeDocument component
-    used by the preview, but without the mobile transform.
-  */
+  // Always render the export from a fixed A4-width element. The visible
+  // preview is scaled on phones, but PDF generation must never inherit that
+  // mobile transform/viewport.
   const canvas = await html2canvas(element, {
     scale: 2,
-
     useCORS: true,
-
-    allowTaint: false,
-
     backgroundColor: "#ffffff",
-
     logging: false,
-
-    width,
-
-    height,
-
-    windowWidth: width,
-
-    windowHeight: Math.max(1123, height),
-
+    width: element.scrollWidth,
+    height: element.scrollHeight,
+    windowWidth: 794,
+    windowHeight: Math.max(1123, element.scrollHeight),
     scrollX: 0,
-
     scrollY: 0,
-
-    imageTimeout: 15000,
   });
 
-  if (!canvas.width || !canvas.height) {
-    throw new Error("The generated resume image is empty.");
-  }
-
-  const pdf = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-    compress: true,
-  });
-
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
   const pageWidth = 210;
   const pageHeight = 297;
-
-  /*
-    Canvas width is 794 * scale.
-
-    Calculate the number of canvas pixels that fit on one
-    A4 page while keeping the exact aspect ratio.
-  */
-  const pagePixelHeight = Math.floor(
-    (canvas.width * pageHeight) / pageWidth
-  );
-
-  const pageCount = Math.max(
-    1,
-    Math.ceil(canvas.height / pagePixelHeight)
-  );
+  const pagePixelHeight = Math.floor((canvas.width * pageHeight) / pageWidth);
+  const pageCount = Math.max(1, Math.ceil(canvas.height / pagePixelHeight));
 
   for (let page = 0; page < pageCount; page += 1) {
     const sourceY = page * pagePixelHeight;
-
-    const sourceHeight = Math.min(
-      pagePixelHeight,
-      canvas.height - sourceY
-    );
-
-    if (sourceHeight <= 2) {
-      continue;
-    }
+    const sourceHeight = Math.min(pagePixelHeight, canvas.height - sourceY);
+    if (sourceHeight <= 2) continue;
 
     const pageCanvas = document.createElement("canvas");
-
     pageCanvas.width = canvas.width;
     pageCanvas.height = sourceHeight;
-
     const context = pageCanvas.getContext("2d");
-
-    if (!context) {
-      throw new Error("Could not prepare the PDF page.");
-    }
-
+    if (!context) throw new Error("Could not prepare the PDF page.");
     context.fillStyle = "#ffffff";
-    context.fillRect(
-      0,
-      0,
-      pageCanvas.width,
-      pageCanvas.height
-    );
+    context.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+    context.drawImage(canvas, 0, sourceY, canvas.width, sourceHeight, 0, 0, canvas.width, sourceHeight);
 
-    context.drawImage(
-      canvas,
-      0,
-      sourceY,
-      canvas.width,
-      sourceHeight,
-      0,
-      0,
-      canvas.width,
-      sourceHeight
-    );
-
-    if (page > 0) {
-      pdf.addPage();
-    }
-
-    const imageHeight =
-      (sourceHeight * pageWidth) / canvas.width;
-
-    const imageData = pageCanvas.toDataURL(
-      "image/jpeg",
-      0.96
-    );
-
-    pdf.addImage(
-      imageData,
-      "JPEG",
-      0,
-      0,
-      pageWidth,
-      imageHeight,
-      undefined,
-      "FAST"
-    );
+    if (page > 0) pdf.addPage();
+    const imageHeight = (sourceHeight * pageWidth) / canvas.width;
+    pdf.addImage(pageCanvas.toDataURL("image/jpeg", 0.96), "JPEG", 0, 0, pageWidth, imageHeight, undefined, "FAST");
   }
 
   return pdf.output("blob");
 }
 
 function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onloadend = () => resolve(reader.result);
-
-    reader.onerror = reject;
-
-    reader.readAsDataURL(blob);
-  });
+  return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onloadend = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(blob); });
 }
-
-/* =========================================================
-   MAIN COMPONENT
-========================================================= */
 
 export default function ResumePreview() {
   const { id } = useParams();
-
   const [resume, setResume] = useState(null);
   const [error, setError] = useState("");
-
   const [showShare, setShowShare] = useState(false);
-
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState("");
-
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-
   const [resumeScale, setResumeScale] = useState(1);
-  const [resumeStageHeight, setResumeStageHeight] =
-    useState(1123);
-
+  const [resumeStageHeight, setResumeStageHeight] = useState(1123);
   const pdfExportRef = useRef(null);
   const screenResumeRef = useRef(null);
 
-  /* =======================================================
-     RESPONSIVE SCALE
-  ======================================================= */
-
+  // Keep the resume authored at a real A4 screen size (794 x 1123 CSS px)
+  // and only scale the whole document visually. Using CSS `mm` multiplication
+  // for the wrapper is unreliable on some mobile browsers and was the reason
+  // the preview could collapse to a tiny strip.
   useEffect(() => {
     const updateScale = () => {
-      const viewportWidth =
-        document.documentElement.clientWidth ||
-        window.innerWidth;
-
-      const available = Math.max(
-        280,
-        viewportWidth - 24
-      );
-
-      setResumeScale(
-        Math.min(1, available / 794)
-      );
+      const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+      const available = Math.max(280, viewportWidth - 24);
+      setResumeScale(Math.min(1, available / 794));
     };
 
     updateScale();
-
     window.addEventListener("resize", updateScale);
-
-    return () => {
-      window.removeEventListener(
-        "resize",
-        updateScale
-      );
-    };
+    return () => window.removeEventListener("resize", updateScale);
   }, []);
 
-  /* =======================================================
-     MEASURE SCREEN RESUME
-  ======================================================= */
-
+  // The resume can grow beyond one A4 page. Because the screen document is
+  // transformed, its transformed height is not part of normal layout flow,
+  // so measure the real document height and give the stage the correct
+  // scaled height. ResizeObserver also catches changes caused by inline edits.
   useEffect(() => {
     const element = screenResumeRef.current;
-
-    if (!element) {
-      return undefined;
-    }
+    if (!element) return undefined;
 
     const measure = () => {
-      const height = Math.max(
-        1123,
-        element.scrollHeight || 1123
-      );
-
-      setResumeStageHeight(
-        Math.ceil(height * resumeScale)
-      );
+      const height = Math.max(1123, element.scrollHeight || 1123);
+      setResumeStageHeight(Math.ceil(height * resumeScale));
     };
 
     const frame = requestAnimationFrame(measure);
-
     const observer = new ResizeObserver(measure);
-
     observer.observe(element);
-
     window.addEventListener("resize", measure);
 
     return () => {
       cancelAnimationFrame(frame);
-
       observer.disconnect();
-
-      window.removeEventListener(
-        "resize",
-        measure
-      );
+      window.removeEventListener("resize", measure);
     };
   }, [resume, resumeScale]);
-
-  /* =======================================================
-     LOAD RESUME
-  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -558,10 +304,6 @@ export default function ResumePreview() {
     };
   }, [id]);
 
-  /* =======================================================
-     LOADING / ERROR
-  ======================================================= */
-
   if (error) {
     return (
       <div className="app-shell">
@@ -570,15 +312,9 @@ export default function ResumePreview() {
         <main className="page-content">
           <div className="error-card">
             <div className="error-icon">!</div>
-
             <h2>Something went wrong</h2>
-
             <p>{error}</p>
-
-            <Link
-              to="/dashboard"
-              className="btn-primary"
-            >
+            <Link to="/dashboard" className="btn-primary">
               Back to dashboard
             </Link>
           </div>
@@ -595,7 +331,6 @@ export default function ResumePreview() {
         <main className="page-content">
           <div className="loading-card">
             <div className="loading-spinner" />
-
             <p>Loading your resume...</p>
           </div>
         </main>
@@ -603,12 +338,7 @@ export default function ResumePreview() {
     );
   }
 
-  const templateId =
-    resume.template || "classic";
-
-  /* =======================================================
-     RESUME EDITING
-  ======================================================= */
+  const templateId = resume.template || "classic";
 
   const handleResumeChange = (next) => {
     setResume(next);
@@ -616,256 +346,86 @@ export default function ResumePreview() {
     setSaveMessage("");
   };
 
-  /* =======================================================
-     SAVE
-  ======================================================= */
-
   const saveInlineChanges = async () => {
     setSaving(true);
     setSaveMessage("");
-
     try {
       const payload = {
         name: resume.name,
-
-        template:
-          resume.template || "classic",
-
-        color:
-          resume.color || "violet",
-
-        personal_info:
-          resume.personal_info || {},
-
-        education:
-          resume.education || [],
-
-        experience:
-          resume.experience || [],
-
-        skills:
-          (resume.skills || []).filter(Boolean),
-
-        projects:
-          resume.projects || [],
-
-        section_order:
-          resume.section_order || [
-            "summary",
-            "experience",
-            "education",
-            "skills",
-            "projects",
-          ],
+        template: resume.template || "classic",
+        color: resume.color || "violet",
+        personal_info: resume.personal_info || {},
+        education: resume.education || [],
+        experience: resume.experience || [],
+        skills: (resume.skills || []).filter(Boolean),
+        projects: resume.projects || [],
+        section_order: resume.section_order || ["summary", "experience", "education", "skills", "projects"],
       };
-
-      const saved = await updateResume(
-        id,
-        payload
-      );
-
+      const saved = await updateResume(id, payload);
       setResume(saved);
-
       setDirty(false);
-
       setSaveMessage("Saved");
     } catch (e) {
-      setSaveMessage(
-        e.response?.data?.detail ||
-          "Could not save changes."
-      );
+      setSaveMessage(e.response?.data?.detail || "Could not save changes.");
     } finally {
       setSaving(false);
     }
   };
 
-  /* =======================================================
-     CREATE PDF
-  ======================================================= */
-
   const createPdf = async () => {
-    const element =
-      pdfExportRef.current;
-
-    if (!element) {
-      throw new Error(
-        "Resume PDF renderer is not ready."
-      );
-    }
-
-    /*
-      Make sure the exported document is using the
-      latest React state.
-    */
-    await new Promise((resolve) =>
-      requestAnimationFrame(() =>
-        requestAnimationFrame(resolve)
-      )
-    );
-
+    const element = pdfExportRef.current;
+    if (!element) throw new Error("Resume PDF renderer is not ready.");
+    // Give React/layout one frame to settle after an inline edit.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return makePdfBlob(element);
   };
 
-  /* =======================================================
-     DOWNLOAD PDF
-  ======================================================= */
-
   const downloadPdf = async () => {
-    setPdfBusy(true);
-    setPdfError("");
-
+    setPdfBusy(true); setPdfError("");
     try {
       const blob = await createPdf();
-
-      const url =
-        URL.createObjectURL(blob);
-
-      const safeName =
-        (resume.name || "resume")
-          .replace(
-            /[^a-z0-9 _-]/gi,
-            ""
-          )
-          .trim() || "resume";
-
-      const a =
-        document.createElement("a");
-
-      a.href = url;
-
-      a.download =
-        `${safeName}.pdf`;
-
-      document.body.appendChild(a);
-
-      a.click();
-
-      a.remove();
-
-      setTimeout(
-        () =>
-          URL.revokeObjectURL(url),
-        1000
-      );
-    } catch (e) {
-      console.error(
-        "PDF generation error:",
-        e
-      );
-
-      setPdfError(
-        "Could not generate the PDF. Please try again."
-      );
-    } finally {
-      setPdfBusy(false);
-    }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `${(resume.name || "resume").replace(/[^a-z0-9 _-]/gi, "").trim() || "resume"}.pdf`; a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) { setPdfError("Could not generate the PDF. Please try again."); } finally { setPdfBusy(false); }
   };
-
-  /* =======================================================
-     SHARE
-  ======================================================= */
-
-  const handleSendResume = async (
-    email,
-    message
-  ) => {
-    /*
-      IMPORTANT:
-      The PDF is generated from the SAME ResumeDocument
-      content used by the preview.
-
-      Therefore the attachment contains:
-      - same template
-      - same color
-      - same profile image
-      - same text
-      - same dates
-      - same sections
-      - same ordering
-    */
-
-    const blob = await createPdf();
-
-    const pdfBase64 =
-      await blobToBase64(blob);
-
-    return shareResume(
-      id,
-      email,
-      message,
-      pdfBase64
-    );
-  };
-
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="app-shell preview-page">
-
-      {/* NAVBAR */}
+      {/* This entire area is hidden during printing */}
       <div className="no-print">
         <Navbar />
       </div>
 
       <main className="page-content preview-page-content">
-
-        {/* TOOLBAR */}
+        {/* Screen-only toolbar */}
         <div className="preview-toolbar no-print">
-
           <div>
-            <Link
-              to="/dashboard"
-              className="back-link"
-            >
+            <Link to="/dashboard" className="back-link">
               ← Back to dashboard
             </Link>
 
-            <h1 className="preview-title">
-              {resume.name}
-            </h1>
+            <h1 className="preview-title">{resume.name}</h1>
 
             <p className="preview-subtitle">
-              Click any highlighted text on the
-              resume to edit it directly. Changes
-              are saved with{" "}
-              <strong>
-                Save changes
-              </strong>
-              .
+              Click any highlighted text on the resume to edit it directly. Changes are saved with <strong>Save changes</strong>.
             </p>
           </div>
 
           <div className="header-actions">
-
             <button
               type="button"
-              className={`btn-secondary ${
-                dirty
-                  ? "save-needed"
-                  : ""
-              }`}
-              onClick={
-                saveInlineChanges
-              }
-              disabled={
-                !dirty || saving
-              }
+              className={`btn-secondary ${dirty ? "save-needed" : ""}`}
+              onClick={saveInlineChanges}
+              disabled={!dirty || saving}
             >
-              {saving
-                ? "Saving…"
-                : dirty
-                ? "✓ Save changes"
-                : "✓ Saved"}
+              {saving ? "Saving…" : dirty ? "✓ Save changes" : "✓ Saved"}
             </button>
 
             <button
               type="button"
               className="btn-secondary"
-              onClick={() =>
-                setShowShare(true)
-              }
+              onClick={() => setShowShare(true)}
             >
               ✉ Share
             </button>
@@ -873,146 +433,56 @@ export default function ResumePreview() {
             <button
               type="button"
               className="btn-primary"
-              onClick={
-                downloadPdf
-              }
+              onClick={downloadPdf}
               disabled={pdfBusy}
             >
-              {pdfBusy
-                ? "Generating PDF…"
-                : "⤓ Download PDF"}
+              {pdfBusy ? "Generating PDF…" : "⤓ Download PDF"}
             </button>
-
           </div>
         </div>
 
-        {/* PDF ERROR */}
-        {pdfError && (
-          <div
-            className="form-error no-print"
-            role="alert"
-          >
-            <span>!</span>
-            {pdfError}
-          </div>
-        )}
+        {pdfError && <div className="form-error no-print" role="alert"><span>!</span>{pdfError}</div>}
+        {saveMessage && <div className={`inline-save-message no-print ${saveMessage === "Saved" ? "success" : ""}`} role="status">{saveMessage}</div>}
 
-        {/* SAVE MESSAGE */}
-        {saveMessage && (
-          <div
-            className={`inline-save-message no-print ${
-              saveMessage === "Saved"
-                ? "success"
-                : ""
-            }`}
-            role="status"
-          >
-            {saveMessage}
-          </div>
-        )}
-
-        {/* DUMMY DATA MESSAGE */}
         {resume._dummyPreview && (
           <div className="dummy-hint no-print">
-            <strong>
-              Edit directly on the resume:
-            </strong>{" "}
-            tap/click any highlighted field,
-            type your changes, then press{" "}
-            <strong>
-              Save changes
-            </strong>
-            .
+            <strong>Edit directly on the resume:</strong> tap/click any highlighted field, type your changes, then press <strong>Save changes</strong>.
           </div>
         )}
 
-        {/* =================================================
-            VISIBLE MOBILE/RESPONSIVE PREVIEW
-
-            This is the resume the user sees.
-        ================================================== */}
-
+        {/* ONLY THIS ELEMENT IS PRINTED */}
         <div
           className="resume-mobile-stage"
           style={{
-            "--resume-scale":
-              resumeScale,
-
-            "--resume-stage-width":
-              `${Math.ceil(
-                794 * resumeScale
-              )}px`,
-
-            "--resume-stage-height":
-              `${Math.ceil(
-                resumeStageHeight
-              )}px`,
+            "--resume-scale": resumeScale,
+            "--resume-stage-width": `${Math.ceil(794 * resumeScale)}px`,
+            "--resume-stage-height": `${Math.ceil(resumeStageHeight)}px`,
           }}
         >
-          <div
-            ref={screenResumeRef}
-            className="resume-mobile-document"
-          >
+          <div ref={screenResumeRef} className="resume-mobile-document">
             <ResumeDocument
               resume={resume}
-              templateId={
-                templateId
-              }
+              templateId={templateId}
               editable
-              onChange={
-                handleResumeChange
-              }
+              onChange={handleResumeChange}
             />
           </div>
         </div>
 
-        {/* =================================================
-            PDF EXPORT RENDERER
-
-            IMPORTANT:
-            This is NOT display:none.
-            It is NOT opacity:0.
-            It is NOT z-index:-1.
-
-            It is simply positioned far outside the
-            visible viewport so html2canvas can render it.
-        ================================================== */}
-
-        <div
-          className="pdf-export-host"
-          aria-hidden="true"
-        >
-          <div
-            ref={pdfExportRef}
-            className="pdf-export-document"
-          >
-            <ResumeDocument
-              resume={resume}
-              templateId={
-                templateId
-              }
-              editable={false}
-            />
+        <div className="pdf-export-host" aria-hidden="true">
+          <div ref={pdfExportRef}>
+            <ResumeDocument resume={resume} templateId={templateId} />
           </div>
         </div>
-
       </main>
 
-      {/* SHARE MODAL */}
       {showShare && (
         <ShareModal
-          resumeName={
-            resume.name
-          }
-          onClose={() =>
-            setShowShare(false)
-          }
-          onSend={
-            handleSendResume
-          }
+          resumeName={resume.name}
+          onClose={() => setShowShare(false)}
+          onSend={async (email, message) => { const blob = await createPdf(); const pdfBase64 = await blobToBase64(blob); return shareResume(id, email, message, pdfBase64); }}
         />
       )}
-
     </div>
   );
 }
