@@ -1,3 +1,5 @@
+[file name]: root {.txt
+[file content begin]
 :root {
   --bg: #f6f7fb;
   --surface: #ffffff;
@@ -4016,21 +4018,30 @@ button:disabled {
 
 .resume-inline-add:hover { background: rgba(109,61,245,.1); }
 
-/* Never let the PDF renderer inherit mobile scaling or clip long resumes. */
+/* =========================================================
+   PDF EXPORT RENDERER
+   =========================================================
+   Keep the renderer in the DOM and fully rendered.
+   Do NOT use display:none, visibility:hidden, opacity:0,
+   or z-index:-1 because html2canvas can capture a blank
+   document in those situations.
+*/
 .pdf-export-host {
-  position: absolute;
-  left: 0;
+  position: fixed;
+  left: -10000px;
   top: 0;
-  z-index: -1;
   width: 210mm;
   min-height: 297mm;
-  background: #fff;
+  z-index: 1;
+  background: #ffffff;
   overflow: visible;
   pointer-events: none;
 }
 
-.pdf-export-host > div {
+.pdf-export-document {
   width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
   overflow: visible;
 }
 
@@ -4052,7 +4063,9 @@ button:disabled {
   cursor: default !important;
 }
 
-.pdf-export-host .resume-inline-add { display: none !important; }
+.pdf-export-host .resume-inline-add {
+  display: none !important;
+}
 
 /* Mobile admin: tabs scroll instead of wrapping/colliding; tables become cards. */
 @media (max-width: 760px) {
@@ -4626,279 +4639,581 @@ body {
 
 
 /* =========================================================
-   RESPONSIVE FIX PACK — ResumeForge
-   Loaded last so it safely overrides older desktop/mobile rules.
+   RESUMEFORGE FINAL RESPONSIVE UI OVERRIDES
+   These rules intentionally come last so older responsive rules
+   in this stylesheet cannot collapse A4 documents or the navbar.
 ========================================================= */
 
-/* ---------- Header / account menu ---------- */
-.desktop-nav-links { display: flex; align-items: center; gap: 5px; }
-.mobile-menu-button { display: none; }
-.account-dropdown { display: none; }
-
-@media (max-width: 760px) {
-  .navbar { position: sticky; top: 0; z-index: 1000; }
-  .navbar-inner {
-    width: calc(100% - 20px) !important;
-    min-height: 64px !important;
-    gap: 10px;
-  }
-  .navbar-brand { font-size: 18px; gap: 8px; }
-  .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
-  .navbar-links { margin-left: auto; gap: 6px; }
-  .desktop-nav-links, .navbar-divider, .navbar-links > .user-menu > .user-info,
-  .navbar-links > .user-menu > .logout-button { display: none !important; }
-
-  .user-menu { position: relative; margin: 0 !important; }
-  .mobile-menu-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 42px;
-    padding: 4px 10px 4px 5px;
-    border: 1px solid #e1e4ee;
-    border-radius: 12px;
-    background: #fff;
-    color: var(--ui-ink, #141625);
-    box-shadow: 0 5px 16px rgba(25,31,55,.06);
-    cursor: pointer;
-  }
-  .mobile-menu-button .user-avatar { width: 32px; height: 32px; flex: 0 0 32px; }
-  .mobile-menu-label { font-size: 12px; font-weight: 800; }
-  .menu-chevron { font-size: 16px; line-height: 1; transition: transform .18s ease; }
-  .mobile-menu-button.open .menu-chevron { transform: rotate(180deg); }
-
-  .account-dropdown {
-    position: absolute;
-    display: block;
-    top: calc(100% + 10px);
-    right: 0;
-    width: min(280px, calc(100vw - 24px));
-    padding: 8px;
-    border: 1px solid #e3e6ef;
-    border-radius: 16px;
-    background: rgba(255,255,255,.98);
-    box-shadow: 0 20px 55px rgba(25,31,55,.16);
-    backdrop-filter: blur(14px);
-    animation: accountDropIn .16s ease-out;
-  }
-  .account-dropdown-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    margin-bottom: 5px;
-    border-radius: 11px;
-    background: #f7f8fc;
-  }
-  .account-dropdown-header > div { min-width: 0; display: flex; flex-direction: column; }
-  .account-dropdown-header strong { font-size: 12px; }
-  .account-dropdown-header span:not(.user-avatar) {
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    color: #7b8091; font-size: 10px; margin-top: 2px;
-  }
-  .account-dropdown-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 42px;
-    padding: 0 11px;
-    border-radius: 10px;
-    color: #45495a;
-    background: transparent;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    border: 0;
-    cursor: pointer;
-    text-align: left;
-  }
-  .account-dropdown-item span { width: 20px; text-align: center; font-size: 15px; }
-  .account-dropdown-item:hover, .account-dropdown-item.active {
-    background: #eeedff; color: #635bff;
-  }
-  .account-dropdown-item.danger { color: #c2415a; margin-top: 3px; }
-  .account-dropdown-item.danger:hover { background: #fff0f2; color: #b4233f; }
+/* ---------- Mobile navigation ---------- */
+.mobile-menu-wrap { display: none; position: relative; }
+.mobile-menu-button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 750;
+  box-shadow: 0 3px 10px rgba(20,16,35,.05);
 }
-@keyframes accountDropIn {
-  from { opacity: 0; transform: translateY(-5px) scale(.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.mobile-menu-button.open { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.mobile-menu-icon { display: flex; flex-direction: column; gap: 3px; width: 16px; }
+.mobile-menu-icon i { display: block; width: 16px; height: 2px; border-radius: 2px; background: currentColor; }
+.mobile-dropdown {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  width: min(290px, calc(100vw - 24px));
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 20px 55px rgba(20,16,35,.16);
+  backdrop-filter: blur(16px);
+  z-index: 500;
 }
+.mobile-user-summary { display:flex; align-items:center; gap:11px; padding:7px 7px 11px; }
+.mobile-user-summary > div:last-child { min-width:0; display:flex; flex-direction:column; gap:2px; }
+.mobile-user-summary strong { font-size:13px; color:var(--text); }
+.mobile-user-summary span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:210px; color:var(--text-muted); font-size:10px; }
+.mobile-dropdown-divider { height:1px; background:var(--border); margin:0 2px 7px; }
+.mobile-dropdown-link {
+  width:100%; min-height:42px; display:flex; align-items:center; gap:10px;
+  padding:0 11px; border:0; border-radius:10px; background:transparent;
+  color:var(--text-secondary); font-size:13px; font-weight:700; text-align:left;
+}
+.mobile-dropdown-link span { width:20px; text-align:center; font-size:15px; }
+.mobile-dropdown-link:hover, .mobile-dropdown-link.active { background:var(--primary-light); color:var(--primary); }
+.mobile-logout:hover { background:var(--danger-light); color:var(--danger); }
 
-/* ---------- Dashboard resume cards: real A4 thumbnails ---------- */
+/* ---------- Dashboard: actual A4 resume thumbnails ---------- */
+.resume-card-preview-link { margin: -20px -20px 18px; }
 .resume-card-preview {
-  height: 310px !important;
-  position: relative !important;
-  overflow: hidden !important;
-  display: block !important;
+  height: 452px;
+  position: relative;
+  overflow: hidden;
+  display:flex;
+  justify-content:center;
+  background: linear-gradient(145deg,#f5f3fa,#ece9f4);
 }
+.resume-card-preview-viewport { position:relative; width:100%; height:100%; overflow:hidden; }
 .resume-card-preview-scale {
-  position: absolute !important;
-  top: 14px !important;
-  left: 50% !important;
-  width: 794px !important;
-  min-width: 794px !important;
-  height: 1123px !important;
-  transform: translateX(-50%) scale(.345) !important;
-  transform-origin: top center !important;
+  position:absolute;
+  top:18px;
+  left:50%;
+  width:794px !important;
+  min-width:794px;
+  transform:translateX(-50%) scale(.40) !important;
+  transform-origin:top center !important;
 }
 .resume-card-preview-scale .resume-print-area {
-  width: 794px !important;
-  min-width: 794px !important;
-  max-width: 794px !important;
-  min-height: 1123px !important;
-  margin: 0 !important;
-  transform: none !important;
-  box-shadow: 0 14px 35px rgba(20,24,40,.15) !important;
+  width:794px !important;
+  min-width:794px !important;
+  max-width:794px !important;
+  min-height:1123px !important;
+  margin:0 !important;
+  padding:68px 64px 76px !important;
+  transform:none !important;
+  overflow:hidden !important;
+  box-shadow:0 18px 42px rgba(20,16,35,.14) !important;
 }
-.resume-card-preview-overlay { z-index: 2; }
-
-@media (max-width: 620px) {
-  .resume-card-preview { height: 330px !important; }
-  .resume-card-preview-scale { transform: translateX(-50%) scale(.355) !important; }
+.resume-card-preview-scale .resume-two-col {
+  display:flex !important;
+  width:100% !important;
+  min-width:100% !important;
+  min-height:1123px !important;
+}
+.resume-card-preview-scale .resume-sidebar {
+  flex:0 0 34% !important;
+  width:34% !important;
+  min-width:34% !important;
+  max-width:34% !important;
+}
+.resume-card-preview-scale .resume-main { flex:1 1 auto !important; width:auto !important; min-width:0 !important; }
+.resume-card-preview-label {
+  position:absolute; left:12px; bottom:11px; z-index:2;
+  padding:5px 8px; border:1px solid rgba(255,255,255,.8); border-radius:999px;
+  background:rgba(255,255,255,.86); color:var(--text-secondary); font-size:9px; font-weight:750;
+  box-shadow:0 4px 14px rgba(20,16,35,.08); pointer-events:none;
 }
 
-/* ---------- Template gallery: full, readable A4 previews ---------- */
+/* ---------- Template gallery: real A4 cards ---------- */
+.template-gallery-page .page-content { padding-bottom:110px; }
+.template-gallery-header {
+  display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:26px;
+}
+.template-gallery-header .eyebrow { margin-bottom:8px; }
+.template-gallery-tip {
+  flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:11px 13px;
+  border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.78);
+}
+.template-gallery-tip > span { width:30px; height:30px; display:grid; place-items:center; border-radius:9px; background:var(--primary-light); color:var(--primary); }
+.template-gallery-tip > div { display:flex; flex-direction:column; gap:2px; }
+.template-gallery-tip strong { font-size:11px; color:var(--text); }
+.template-gallery-tip small { color:var(--text-muted); font-size:10px; }
 .template-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 24px !important;
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:22px !important;
+  align-items:start;
 }
-.template-card { min-width: 0; overflow: hidden; }
-.template-preview-button {
-  display: block !important;
-  width: 100% !important;
-  padding: 0 !important;
-  border: 0 !important;
-  cursor: pointer;
-  overflow: hidden;
-}
+.template-card { min-width:0; overflow:hidden; }
+.template-preview-button { overflow:hidden; }
 .template-real-preview {
-  position: relative !important;
-  display: block !important;
-  width: 100% !important;
-  height: 410px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  background:
-    radial-gradient(circle at 20% 10%, rgba(99,91,255,.10), transparent 35%),
-    #eef1f7 !important;
+  position:relative;
+  height:510px !important;
+  display:block !important;
+  overflow:hidden !important;
+  padding:0 !important;
+  background:linear-gradient(145deg,#f5f3fa,#ece9f4) !important;
 }
-.template-real-preview .resume-print-area {
-  position: absolute !important;
-  top: 20px !important;
-  left: 50% !important;
-  width: 794px !important;
-  min-width: 794px !important;
-  max-width: 794px !important;
-  min-height: 1123px !important;
+.template-preview-canvas {
+  position:absolute;
+  top:18px;
+  left:50%;
+  width:794px !important;
+  min-width:794px !important;
+  transform:translateX(-50%) scale(.43) !important;
+  transform-origin:top center !important;
+}
+.template-preview-canvas > .resume-print-area {
+  width:794px !important;
+  min-width:794px !important;
+  max-width:794px !important;
+  min-height:1123px !important;
+  margin:0 !important;
+  padding:68px 64px 76px !important;
+  transform:none !important;
+  overflow:hidden !important;
+  box-shadow:0 20px 48px rgba(20,16,35,.16) !important;
+}
+.template-preview-canvas .resume-two-col {
+  display:flex !important;
+  width:100% !important;
+  min-width:100% !important;
+  min-height:1123px !important;
+}
+.template-preview-canvas .resume-sidebar {
+  flex:0 0 34% !important;
+  width:34% !important;
+  min-width:34% !important;
+  max-width:34% !important;
+  padding:83px 16px 75px 64px !important;
+}
+.template-preview-canvas .resume-main { flex:1 1 auto !important; width:auto !important; min-width:0 !important; padding:83px 64px 75px 20px !important; }
+.template-preview-label {
+  position:absolute; right:12px; bottom:11px; z-index:2;
+  padding:5px 8px; border:1px solid rgba(255,255,255,.85); border-radius:999px;
+  background:rgba(255,255,255,.9); color:var(--text-secondary); font-size:9px; font-weight:750;
+  box-shadow:0 4px 14px rgba(20,16,35,.08); pointer-events:none;
+}
+.template-card.selected .template-real-preview { background:linear-gradient(145deg,var(--primary-light),#eeeaf7); }
+.template-apply-bar { position:sticky; bottom:14px; z-index:30; }
+.template-apply-bar > div { display:flex; align-items:center; gap:7px; color:var(--text-secondary); font-size:12px; }
+.template-apply-bar > div span { color:var(--text-muted); }
+.template-apply-bar > div strong { color:var(--text); }
+.template-apply-bar > div em { font-style:normal; color:var(--text-muted); }
+
+/* ---------- Preview page: keep hidden PDF renderer completely out of view ---------- */
+.preview-page .pdf-export-host {
+  position:fixed !important;
+  left:-100000px !important;
+  top:0 !important;
+  width:210mm !important;
+  height:auto !important;
+  min-height:297mm !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  z-index:-9999 !important;
+}
+.preview-page .pdf-export-host .resume-print-area { box-shadow:none !important; }
+
+/* ---------- Responsive ---------- */
+@media (max-width:1050px) {
+  .template-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+}
+@media (max-width:760px) {
+  .desktop-navbar-links { display:none !important; }
+  .mobile-menu-wrap { display:block; }
+  .navbar-inner { width:calc(100% - 24px); min-height:64px; }
+  .page-content { width:calc(100% - 24px); }
+
+  .dashboard-hero { gap:18px; }
+  .dashboard-hero h1 { font-size:36px; }
+  .resume-grid { grid-template-columns:1fr !important; }
+  .resume-card-preview { height:452px !important; }
+  .resume-card-preview-scale { transform:translateX(-50%) scale(.40) !important; }
+
+  .template-gallery-header { align-items:flex-start; flex-direction:column; }
+  .template-gallery-tip { width:100%; }
+  .template-grid { grid-template-columns:1fr !important; gap:18px !important; }
+  .template-real-preview { height:510px !important; }
+  .template-preview-canvas { transform:translateX(-50%) scale(.43) !important; }
+  .template-card-body { padding:17px !important; }
+  .template-apply-bar { flex-direction:column; align-items:stretch; gap:11px; }
+  .template-apply-bar > div { justify-content:center; }
+  .template-apply-bar .btn-primary { width:100%; }
+
+  /* Never let old mobile resume rules turn a sidebar template into a stack. */
+  .template-preview-canvas .resume-print-area,
+  .resume-card-preview-scale .resume-print-area { width:794px !important; min-width:794px !important; max-width:794px !important; }
+  .template-preview-canvas .resume-two-col,
+  .resume-card-preview-scale .resume-two-col { display:flex !important; flex-direction:row !important; }
+  .template-preview-canvas .resume-sidebar,
+  .resume-card-preview-scale .resume-sidebar { flex:0 0 34% !important; width:34% !important; min-width:34% !important; max-width:34% !important; }
+  .template-preview-canvas .resume-main,
+  .resume-card-preview-scale .resume-main { flex:1 1 auto !important; width:auto !important; min-width:0 !important; }
+}
+@media (max-width:480px) {
+  .navbar-brand { font-size:17px; }
+  .brand-mark { width:31px; height:31px; }
+  .mobile-menu-button { min-height:38px; padding:0 11px; }
+  .dashboard-hero h1 { font-size:32px; }
+  .resume-card-preview { height:430px !important; }
+  .resume-card-preview-scale { transform:translateX(-50%) scale(.37) !important; }
+  .template-real-preview { height:475px !important; }
+  .template-preview-canvas { transform:translateX(-50%) scale(.40) !important; }
+  .template-gallery-tip small { font-size:9px; }
+}
+
+/* =========================================================
+   RESUME PREVIEW — SKILL TAG + SPACING FIX
+   Add this at the VERY END of:
+   frontend/src/index.css
+========================================================= */
+
+/* Keep editable skill values vertically centered in preview */
+.resume-is-editable .skill-tag.resume-inline-edit,
+.resume-is-editable .resume-edit-skill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  vertical-align: middle !important;
+
+  box-sizing: border-box !important;
+
+  min-height: 24px !important;
+  height: 24px !important;
+
+  padding: 3px 9px !important;
+
   margin: 0 !important;
-  transform: translateX(-50%) scale(.345) !important;
-  transform-origin: top center !important;
-  box-shadow: 0 18px 42px rgba(20,24,40,.18) !important;
-}
-.template-card-body { min-width: 0; }
-.template-card-body p { min-height: 58px; }
-.template-color-row { flex-wrap: wrap; }
-.color-options { display: flex; flex-wrap: wrap; }
 
-@media (max-width: 1050px) {
-  .template-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  line-height: 16px !important;
+  text-align: center !important;
+
+  white-space: nowrap !important;
 }
+
+/* Make the skill container align every item consistently */
+.resume-is-editable .skills-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+
+  gap: 6px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Non-editable preview */
+.skills-list .skill-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+
+  box-sizing: border-box;
+
+  min-height: 24px;
+  padding: 3px 9px;
+
+  line-height: 16px;
+  text-align: center;
+}
+
+/* =========================================================
+   MOBILE PREVIEW
+   IMPORTANT:
+   Do NOT shrink/reflow the actual A4 resume.
+   The complete A4 document is scaled by ResumePreview.jsx.
+========================================================= */
+
 @media (max-width: 700px) {
-  .template-grid { grid-template-columns: 1fr !important; gap: 18px !important; }
-  .template-real-preview {
-    height: 430px !important;
+  .preview-page .resume-mobile-document .resume-print-area {
+    width: 794px !important;
+    min-width: 794px !important;
+    max-width: 794px !important;
+
+    min-height: 1123px !important;
+
+    padding: 68px 64px 76px !important;
+
+    box-sizing: border-box !important;
+
+    overflow: visible !important;
+
+    transform: none !important;
   }
-  .template-real-preview .resume-print-area {
-    top: 16px !important;
-    transform: translateX(-50%) scale(.375) !important;
+
+  .preview-page .resume-mobile-document .skills-list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+
+    gap: 6px !important;
   }
-}
-@media (max-width: 380px) {
-  .template-real-preview { height: 415px !important; }
-  .template-real-preview .resume-print-area {
-    transform: translateX(-50%) scale(.35) !important;
+
+  .preview-page .resume-mobile-document
+    .resume-is-editable
+    .skill-tag.resume-inline-edit,
+  .preview-page .resume-mobile-document
+    .resume-is-editable
+    .resume-edit-skill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    height: 24px !important;
+    min-height: 24px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 3px 9px !important;
+
+    margin: 0 !important;
+
+    line-height: 16px !important;
+    text-align: center !important;
+
+    vertical-align: middle !important;
   }
 }
 
-/* ---------- Preview page: no duplicate/off-screen resume ---------- */
-.preview-page-content {
-  width: min(1180px, calc(100% - 40px));
+/* =========================================================
+   REMOVE MOBILE STYLES FROM THE ACTUAL A4 PREVIEW
+   These prevent unequal spacing caused by the generic mobile
+   resume rules elsewhere in index.css.
+========================================================= */
+
+@media (max-width: 700px) {
+  .preview-page .resume-mobile-document .resume-section {
+    margin-top: 23px !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-section-heading {
+    margin-bottom: 12px !important;
+    padding-bottom: 7px !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-item-top {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 18px !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-item-main {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-item-date {
+    flex: 0 0 auto !important;
+    align-self: flex-start !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-description,
+  .preview-page .resume-mobile-document .resume-summary {
+    line-height: 1.55 !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-company {
+    line-height: 1.35 !important;
+  }
 }
-.resume-mobile-stage {
+
+/* =========================================================
+   PROJECT HEADER — KEEP TITLE/TECH/LINK ALIGNED
+========================================================= */
+
+.preview-page .resume-mobile-document .resume-project-top {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+
+.preview-page .resume-mobile-document .resume-project-main {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.preview-page .resume-mobile-document .resume-project-link-wrap {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+/* =========================================================
+   INLINE EDITABLE ELEMENTS
+========================================================= */
+
+.preview-page .resume-mobile-document .resume-inline-edit {
+  box-sizing: border-box !important;
+}
+
+.preview-page
+  .resume-mobile-document
+  .resume-inline-edit.resume-edit-skill {
+  vertical-align: middle !important;
+}
+
+/* =========================================================
+   A4 PREVIEW STAGE
+========================================================= */
+
+.preview-page .resume-mobile-stage {
   position: relative !important;
-  width: min(794px, calc(100vw - 24px)) !important;
-  max-width: calc(100vw - 24px) !important;
-  margin: 0 auto !important;
+
+  width: var(--resume-stage-width, 794px) !important;
+  min-width: var(--resume-stage-width, 794px) !important;
+
+  height: var(--resume-stage-height, 1123px) !important;
+  min-height: var(--resume-stage-height, 1123px) !important;
+
+  margin-left: auto !important;
+  margin-right: auto !important;
+
   overflow: visible !important;
 }
-.resume-mobile-document {
+
+.preview-page .resume-mobile-document {
+  position: absolute !important;
+
+  top: 0 !important;
+  left: 0 !important;
+
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+
+  margin: 0 !important;
+
+  transform: scale(var(--resume-scale, 1)) !important;
+  transform-origin: top left !important;
+}
+
+/* =========================================================
+   SIDEBAR TEMPLATES
+========================================================= */
+
+.preview-page .resume-mobile-document .resume-two-col {
+  display: flex !important;
+
+  width: 794px !important;
+  min-width: 794px !important;
+
+  min-height: 1123px !important;
+}
+
+.preview-page .resume-mobile-document .resume-sidebar {
+  flex: 0 0 34% !important;
+
+  width: 34% !important;
+  min-width: 34% !important;
+  max-width: 34% !important;
+}
+
+.preview-page .resume-mobile-document .resume-main {
+  flex: 1 1 auto !important;
+
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+/* Never turn the sidebar into a stacked mobile layout on preview */
+@media (max-width: 700px) {
+  .preview-page .resume-mobile-document .resume-two-col {
+    display: flex !important;
+
+    width: 794px !important;
+    min-width: 794px !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-sidebar {
+    flex: 0 0 34% !important;
+
+    width: 34% !important;
+    min-width: 34% !important;
+    max-width: 34% !important;
+  }
+
+  .preview-page .resume-mobile-document .resume-main {
+    flex: 1 1 auto !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+  }
+}
+
+/* =========================================================
+   PREVENT THE A4 RESUME FROM APPEARING BEHIND/OUTSIDE
+   THE MOBILE PREVIEW
+========================================================= */
+
+.preview-page .resume-mobile-document {
+  isolation: isolate !important;
   z-index: 1 !important;
 }
-.pdf-export-host {
-  position: fixed !important;
-  left: -10000px !important;
-  top: 0 !important;
-  z-index: -100 !important;
-  width: 794px !important;
-  height: auto !important;
-  min-height: 1123px !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-  overflow: visible !important;
-}
-.pdf-export-host > div,
-.pdf-export-host .resume-print-area {
-  width: 794px !important;
-  min-width: 794px !important;
-  max-width: 794px !important;
-}
-@media (max-width: 850px) {
-  .resume-mobile-stage {
-    width: var(--resume-stage-width) !important;
-    max-width: var(--resume-stage-width) !important;
-    height: var(--resume-stage-height) !important;
-    min-height: var(--resume-stage-height) !important;
-  }
-}
-@media (max-width: 700px) {
-  .preview-page-content {
-    width: calc(100% - 20px) !important;
-    padding-top: 18px !important;
-  }
-  .preview-toolbar {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    margin-bottom: 16px !important;
-  }
-  .preview-title { font-size: 25px !important; }
-  .preview-subtitle { line-height: 1.55; }
-  .resume-mobile-stage { margin-left: auto !important; margin-right: auto !important; }
+
+.preview-page .resume-mobile-document .resume-print-area {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
-/* ---------- General mobile polish ---------- */
-html, body, #root { max-width: 100%; overflow-x: hidden; }
-button, input, textarea, select { max-width: 100%; }
-img { max-width: 100%; }
-@media (max-width: 700px) {
-  .dashboard-page { padding-top: 28px !important; }
-  .dashboard-hero {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-  .dashboard-hero h1 {
-    font-size: clamp(32px, 10vw, 40px) !important;
-    line-height: 1.05;
-  }
-  .create-button { width: 100%; }
-  .dashboard-stats { grid-template-columns: 1fr !important; }
-  .resume-grid { grid-template-columns: 1fr !important; }
-  .resume-card { width: 100%; }
-  .resume-card-actions { grid-template-columns: 1fr 1fr; }
+/* PDF renderer remains completely separate from screen preview */
+.preview-page .pdf-export-host {
+  position: fixed !important;
+  left: -100000px !important;
+  top: 0 !important;
+
+  width: 794px !important;
+  min-width: 794px !important;
+
+  height: 1px !important;
+
+  overflow: visible !important;
+
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
-@media (max-width: 430px) {
-  .resume-card-actions { grid-template-columns: 1fr; }
-  .resume-card-actions a { width: 100%; }
+
+.preview-page .pdf-export-document {
+  width: 794px !important;
+  min-width: 794px !important;
 }
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media (max-width: 420px) {
+  .preview-page .resume-mobile-document .skill-tag {
+    min-height: 24px !important;
+    height: 24px !important;
+
+    padding: 3px 9px !important;
+
+    line-height: 16px !important;
+  }
+}
+[file content end]
