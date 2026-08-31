@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON, Index
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -23,6 +23,11 @@ class User(Base):
 
 class Resume(Base):
     __tablename__ = "resumes"
+
+    __table_args__ = (
+        Index("ix_resumes_owner_updated", "owner_id", "updated_at"),
+        Index("ix_resumes_created_at", "created_at"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)  # resume/template name chosen by the user
