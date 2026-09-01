@@ -329,6 +329,16 @@
   font-size: 12px;
 }
 
+.admin-search-large input::-webkit-search-cancel-button,
+.admin-search-large input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.admin-search-large input::-ms-clear {
+  display: none;
+}
+
 .admin-search-large button {
   width: 24px;
   height: 24px;
