@@ -40,7 +40,6 @@ export default function Profile() {
   const { user, updateUser } = useAuth();
 
   const [name, setName] = useState(user?.name || "");
-  const [profileImage, setProfileImage] = useState(user?.profile_image || "");
   const [profileMsg, setProfileMsg] = useState("");
   const [profileError, setProfileError] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
@@ -62,30 +61,6 @@ export default function Profile() {
   const initials = useMemo(() => getInitials(user?.name), [user?.name]);
   const passwordEvaluation = evaluatePassword(passwords.new_password);
 
-  const handleProfileImage = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setProfileError("Please choose an image file.");
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-      setProfileError("Profile image must be 2 MB or smaller.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProfileImage(reader.result);
-      setProfileError("");
-      setProfileMsg("");
-    };
-    reader.readAsDataURL(file);
-    event.target.value = "";
-  };
-
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
 
@@ -104,7 +79,6 @@ export default function Profile() {
     try {
       const res = await client.put("/auth/me", {
         name: trimmedName,
-        profile_image: profileImage || null,
       });
 
       updateUser(res.data);
@@ -188,41 +162,11 @@ export default function Profile() {
         </header>
 
         <section className="profile-identity">
-          {profileImage ? (
-            <img
-              className="profile-avatar profile-avatar-image"
-              src={profileImage}
-              alt="Profile"
-            />
-          ) : (
-            <div className="profile-avatar">{initials}</div>
-          )}
+          <div className="profile-avatar">{initials}</div>
 
           <div>
             <h2>{user?.name || "Your account"}</h2>
             <p>{user?.email || "No email available"}</p>
-          </div>
-
-          <div className="profile-avatar-actions">
-            <label className="btn-secondary profile-image-upload">
-              {profileImage ? "Change photo" : "Add photo"}
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={handleProfileImage}
-                hidden
-              />
-            </label>
-
-            {profileImage && (
-              <button
-                type="button"
-                className="btn-ghost danger"
-                onClick={() => setProfileImage("")}
-              >
-                Remove
-              </button>
-            )}
           </div>
         </section>
 
