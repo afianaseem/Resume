@@ -4714,7 +4714,7 @@ body {
 
 /* ---------- Dashboard: actual A4 resume thumbnails ---------- */
 .resume-card {
-  height: 360px;
+  height: auto;
 }
 
 .resume-card-preview-link { margin: -16px -16px 14px; }
@@ -4879,7 +4879,6 @@ body {
   .dashboard-hero { gap:18px; }
   .dashboard-hero h1 { font-size:36px; }
   .resume-grid { grid-template-columns:1fr !important; }
-  .resume-card { height: 360px; }
   .resume-card-preview { height:220px !important; }
   .resume-card-preview-scale { transform:translateX(-50%) scale(.40) !important; }
 
@@ -4908,7 +4907,6 @@ body {
   .brand-mark { width:31px; height:31px; }
   .mobile-menu-button { min-height:38px; padding:0 11px; }
   .dashboard-hero h1 { font-size:32px; }
-  .resume-card { height: 340px; }
   .resume-card-preview { height:208px !important; }
   .resume-card-preview-scale { transform:translateX(-50%) scale(.37) !important; }
   .template-real-preview { height:475px !important; }

@@ -234,7 +234,6 @@ export default function Dashboard() {
                   </Link>
 
                   <div className="resume-card-top">
-                    <div className="resume-card-icon">{getResumeInitials(resume.name)}</div>
                     <button
                       type="button"
                       className="card-menu"
