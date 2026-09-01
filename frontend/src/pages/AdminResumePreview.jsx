@@ -8,17 +8,20 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
 async function makePdfBlob(element) {
+  const captureWidth = element.scrollWidth || 794;
+  const captureHeight = element.scrollHeight || 1123;
+
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     backgroundColor: "#ffffff",
     logging: false,
-    width: element.scrollWidth,
-    height: element.scrollHeight,
+    width: captureWidth,
+    height: captureHeight,
     windowWidth: 794,
     windowHeight: Math.max(
       1123,
-      element.scrollHeight
+      captureHeight
     ),
     scrollX: 0,
     scrollY: 0,
@@ -126,6 +129,7 @@ export default function AdminResumePreview() {
     useState(1123);
 
   const screenResumeRef = useRef(null);
+  const pdfExportRef = useRef(null);
 
   useEffect(() => {
     const updateScale = () => {
@@ -280,7 +284,7 @@ export default function AdminResumePreview() {
 
     try {
       const element =
-        screenResumeRef.current;
+        pdfExportRef.current;
 
       if (!element) {
         throw new Error(
@@ -449,6 +453,15 @@ export default function AdminResumePreview() {
                 templateId={templateId}
               />
             </div>
+          </div>
+        </div>
+
+        <div className="pdf-export-host" aria-hidden="true">
+          <div ref={pdfExportRef}>
+            <ResumeDocument
+              resume={resume}
+              templateId={templateId}
+            />
           </div>
         </div>
       </main>
