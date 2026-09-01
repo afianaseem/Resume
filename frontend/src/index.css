@@ -3216,7 +3216,7 @@ button:disabled {
 
 .resume-editor-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 1fr) minmax(0, 1.45fr);
   gap: 26px;
   align-items: start;
 }
@@ -3239,7 +3239,7 @@ button:disabled {
   height: calc(100vh - 120px);
 
   border: 0;
-  border-radius: var(--radius-lg);
+  border-radius: 0;
   background: transparent;
   overflow: hidden;
 }
@@ -3247,30 +3247,32 @@ button:disabled {
 .resume-live-preview-scroll {
   flex: 1;
   overflow: auto;
-  padding: 14px;
+  padding: 0;
 
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #faf8ff 0%, #f4f3f8 100%);
-  box-shadow: var(--shadow-sm);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .resume-live-preview-stage {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   min-height: 100%;
+  padding: 0;
 }
 
 .resume-live-preview-scale {
-  transform: scale(0.78);
-  transform-origin: top center;
-  width: 794px;
+  width: min(100%, 794px);
   margin: 0 auto;
+  transform: none;
+  transform-origin: center top;
 }
 
 .resume-live-preview-scale .resume-print-area {
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(17, 24, 39, 0.08);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.04);
+  border: 1px solid rgba(17, 24, 39, 0.06);
 }
 
 @media (max-width: 1200px) {
