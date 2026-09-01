@@ -12,11 +12,6 @@ function formatDate(iso) {
   });
 }
 
-function getResumeInitials(name) {
-  if (!name) return "R";
-  return name.split(" ").map((word) => word[0]).join("").slice(0, 2).toUpperCase();
-}
-
 /*
  * ResumeDocument is intentionally expensive because it is the real A4
  * renderer. The old dashboard rendered one full document for every resume
