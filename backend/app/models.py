@@ -15,6 +15,7 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_admin = Column(Integer, nullable=False, default=0, server_default="0")
     is_active = Column(Integer, nullable=False, default=1, server_default="1")
+    deleted_at = Column(DateTime, nullable=True, index=True)
     profile_image = Column(String, nullable=True)  # store a URL or base64 string
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 

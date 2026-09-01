@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from .config import settings
-from .database import engine
+from .database import engine, ensure_schema
 
 from .routers import (
     auth_routes,
@@ -21,6 +21,11 @@ app = FastAPI(
     title="Resume Builder API",
     version="1.0.0",
 )
+
+
+@app.on_event("startup")
+def upgrade_database_schema():
+    ensure_schema()
 
 
 # ---------------------------------------------------------

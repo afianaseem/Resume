@@ -5,6 +5,7 @@ import {
   adminData,
   adminDeleteResume,
   adminDeleteUser,
+  adminSetUserStatus,
 } from "../api/resumes";
 import { TEMPLATE_COLORS, TEMPLATES } from "../templates";
 
@@ -145,7 +146,7 @@ function ResumeAdminCard({ resume, onDelete }) {
   );
 }
 
-function UserAdminCard({ user, onDelete }) {
+function UserAdminCard({ user, onDelete, onReactivate }) {
   const initial = (user.name || "U")
     .trim()
     .charAt(0)
@@ -188,6 +189,14 @@ function UserAdminCard({ user, onDelete }) {
           <span className="admin-protected-label">
             Protected administrator account
           </span>
+        ) : user.is_deleted || user.deleted_at || user.is_active === false ? (
+          <button
+            type="button"
+            className="admin-card-activate-button"
+            onClick={() => onReactivate(user)}
+          >
+            Activate user
+          </button>
         ) : (
           <button
             type="button"
@@ -338,7 +347,7 @@ export default function AdminDashboard() {
 
   const deleteUser = async (user) => {
     const confirmed = window.confirm(
-      `Delete user ${user.name} and ALL ${user.resume_count || 0} resume(s)? This cannot be undone.`
+      `Deactivate user ${user.name}? Their resumes will be preserved and their account can be activated again.`
     );
 
     if (!confirmed) return;
@@ -349,12 +358,10 @@ export default function AdminDashboard() {
       await adminDeleteUser(user.id);
 
       setUsers((current) =>
-        current.filter((item) => item.id !== user.id)
-      );
-
-      setResumes((current) =>
-        current.filter(
-          (resume) => resume.owner_id !== user.id
+        current.map((item) =>
+          item.id === user.id
+            ? { ...item, is_active: false, is_deleted: true, deleted_at: new Date().toISOString() }
+            : item
         )
       );
 
@@ -362,15 +369,8 @@ export default function AdminDashboard() {
         current
           ? {
               ...current,
-              users: Math.max(
-                0,
-                (current.users || 0) - 1
-              ),
-              resumes: Math.max(
-                0,
-                (current.resumes || 0) -
-                  (user.resume_count || 0)
-              ),
+              users: current.users || 0,
+              resumes: current.resumes || 0,
               active_users:
                 typeof current.active_users === "number"
                   ? Math.max(
@@ -385,7 +385,31 @@ export default function AdminDashboard() {
     } catch (e) {
       setError(
         e.response?.data?.detail ||
-          "Could not delete user."
+          "Could not deactivate user."
+      );
+    }
+  };
+
+  const reactivateUser = async (user) => {
+    try {
+      setError("");
+      const updated = await adminSetUserStatus(user.id, true);
+      setUsers((current) =>
+        current.map((item) =>
+          item.id === user.id
+            ? { ...item, ...updated, is_active: true, is_deleted: false, deleted_at: null }
+            : item
+        )
+      );
+      setOverview((current) =>
+        current && user.is_active === false
+          ? { ...current, active_users: (current.active_users || 0) + 1 }
+          : current
+      );
+    } catch (e) {
+      setError(
+        e.response?.data?.detail ||
+          "Could not activate user."
       );
     }
   };
@@ -686,6 +710,7 @@ export default function AdminDashboard() {
                     key={user.id}
                     user={user}
                     onDelete={deleteUser}
+                    onReactivate={reactivateUser}
                   />
                 ))
               ) : (

@@ -55,6 +55,7 @@ def admin_data(
             models.User.is_admin,
             models.User.created_at,
             models.User.is_active,
+            models.User.deleted_at,
             func.count(models.Resume.id).label("resume_count"),
         )
         .outerjoin(models.Resume, models.Resume.owner_id == models.User.id)
@@ -65,6 +66,7 @@ def admin_data(
             models.User.is_admin,
             models.User.created_at,
             models.User.is_active,
+            models.User.deleted_at,
         )
         .order_by(models.User.created_at.desc())
         .all()
@@ -130,6 +132,8 @@ def admin_data(
                 "created_at": u.created_at,
                 "resume_count": int(u.resume_count or 0),
                 "is_active": bool(u.is_active),
+                "deleted_at": u.deleted_at,
+                "is_deleted": u.deleted_at is not None,
             }
             for u in user_rows
         ],
@@ -172,6 +176,7 @@ def users(admin: models.User = Depends(auth.get_current_admin), db: Session = De
         db.query(
             models.User.id, models.User.name, models.User.email,
             models.User.is_admin, models.User.created_at, models.User.is_active,
+            models.User.deleted_at,
             func.count(models.Resume.id).label("resume_count"),
         )
         .outerjoin(models.Resume, models.Resume.owner_id == models.User.id)
@@ -187,6 +192,7 @@ def users(admin: models.User = Depends(auth.get_current_admin), db: Session = De
             "id": u.id, "name": u.name, "email": u.email,
             "is_admin": bool(u.is_admin), "created_at": u.created_at,
             "resume_count": int(u.resume_count or 0), "is_active": bool(u.is_active),
+            "deleted_at": u.deleted_at, "is_deleted": u.deleted_at is not None,
         }
         for u in rows
     ]
@@ -278,13 +284,19 @@ def set_user_status(
     db.commit()
     return {"id": user.id, "is_active": bool(user.is_active)}
 
-@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/users/{user_id}")
 def delete_user(user_id: int, admin: models.User = Depends(auth.get_current_admin), db: Session = Depends(get_db)):
     if user_id == admin.id:
         raise HTTPException(status_code=400, detail="You cannot delete your own administrator account")
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    db.delete(user)
+    user.is_active = 0
+    user.deleted_at = user.deleted_at or datetime.utcnow()
     db.commit()
-    return None
+    return {
+        "id": user.id,
+        "is_active": False,
+        "deleted_at": user.deleted_at,
+        "is_deleted": True,
+    }

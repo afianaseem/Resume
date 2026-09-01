@@ -721,6 +721,17 @@
   text-decoration: none;
 }
 
+.admin-card-activate-button {
+  padding: 8px 12px;
+  border: 1px solid #b8ddca;
+  border-radius: 8px;
+  background: #effaf3;
+  color: #167447;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .admin-card-view-button {
   gap: 6px;
   background: var(--primary);

@@ -134,7 +134,9 @@ export const adminDeleteResume = (id) =>
    ========================================================= */
 
 export const adminDeleteUser = (id) =>
-  client.delete(`/admin/users/${id}`);
+  client
+    .delete(`/admin/users/${id}`)
+    .then((response) => response.data);
 
 
 export const adminSetUserStatus = (

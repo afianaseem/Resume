@@ -165,6 +165,12 @@ def login(
             detail="Incorrect email or password",
         )
 
+    if not bool(user.is_active) and not bool(user.is_admin):
+        raise HTTPException(
+            status_code=403,
+            detail="Your account is inactive. Please contact the administrator.",
+        )
+
     if not auth.verify_password(
         payload.password,
         user.hashed_password,

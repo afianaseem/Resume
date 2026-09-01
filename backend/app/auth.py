@@ -57,7 +57,7 @@ def get_current_user(
     user = db.query(models.User).filter(models.User.id == int(user_id)).first()
     if user is None:
         raise credentials_exception
-    if hasattr(user, "is_active") and not bool(user.is_active) and not bool(user.is_admin):
+    if not bool(user.is_active) and not bool(user.is_admin):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Your account has been deactivated. Please contact the administrator.")
     return user
 

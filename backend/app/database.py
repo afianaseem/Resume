@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import QueuePool, StaticPool
 
@@ -98,6 +98,22 @@ SessionLocal = sessionmaker(
 
 
 Base = declarative_base()
+
+
+def ensure_schema():
+    """Apply small compatibility upgrades for existing deployments."""
+    inspector = inspect(engine)
+    if "users" not in inspector.get_table_names():
+        return
+
+    user_columns = {
+        column["name"] for column in inspector.get_columns("users")
+    }
+    if "deleted_at" not in user_columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP NULL")
+            )
 
 
 # ---------------------------------------------------------

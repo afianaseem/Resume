@@ -145,7 +145,7 @@ ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=UseARealStrongPassword123!
 ```
 
-On startup, the backend creates that account if it does not exist, or promotes the existing account with that email to administrator. Administrator authorization is enforced by the API; hiding the frontend link is not the security boundary. Deleting a user also deletes that user's resumes. Deleting a resume from Admin Dashboard removes it from the owner's dashboard too.
+On startup, the backend creates that account if it does not exist, or promotes the existing account with that email to administrator. Administrator authorization is enforced by the API; hiding the frontend link is not the security boundary. Deleting a user from the Admin Dashboard is reversible: it sets `deleted_at`, deactivates login, and preserves the user's resumes. The administrator can activate the user again, which clears `deleted_at` and restores access. Deleting a resume from Admin Dashboard still removes it from the owner's dashboard.
 
 ## 8. Email + PDF
 
@@ -169,7 +169,7 @@ You don't need this to develop locally, but if you want a live link to share:
 - Fixed “I currently study here” / “I currently work here” checkbox behavior.
 - Visual PDF download generated from the same rendered document used in Preview.
 - Email sharing uses that same generated PDF attachment, so template/color/photo match the preview.
-- Backend-protected Admin Dashboard with user list, resume list, template usage, user deletion, and resume deletion.
+- Backend-protected Admin Dashboard with user list, resume list, template usage, reversible user deactivation, and resume deletion.
 - Deleting a resume as admin removes it from the owning user's account.
-- Deleting a user also deletes that user's resumes.
-- Existing SQLite databases are upgraded automatically with `template`, `color`, and `is_admin` columns.
+- Deleting a user preserves their resumes and allows later reactivation.
+- Existing SQLite databases are upgraded automatically with `template`, `color`, `is_admin`, and `deleted_at` columns.
