@@ -184,17 +184,17 @@ export default function Dashboard() {
 
         {!loading && (
           <section className="dashboard-stats">
-            <div className="stat-card">
-              <div className="stat-icon">▤</div>
-              <div><span className="stat-label">Total resumes</span><strong>{resumes.length}</strong></div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-icon">▤</div>
+              <div className="admin-stat-content"><span>Total resumes</span><strong>{resumes.length}</strong><small>Saved in your workspace</small></div>
             </div>
-            <div className="stat-card">
-              <div className="stat-icon">✦</div>
-              <div><span className="stat-label">Workspace</span><strong>Personal</strong></div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-icon">✦</div>
+              <div className="admin-stat-content"><span>Workspace</span><strong>Personal</strong><small>Your private resume space</small></div>
             </div>
-            <div className="stat-card">
-              <div className="stat-icon">✓</div>
-              <div><span className="stat-label">Resume builder</span><strong>Ready</strong></div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-icon">✓</div>
+              <div className="admin-stat-content"><span>Resume builder</span><strong>Ready</strong><small>Everything is ready to use</small></div>
             </div>
           </section>
         )}
