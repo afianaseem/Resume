@@ -304,6 +304,16 @@ export default function ResumePreview() {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (!saveMessage) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setSaveMessage("");
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [saveMessage]);
+
   if (error) {
     return (
       <div className="app-shell">

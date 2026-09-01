@@ -137,6 +137,16 @@ export default function ResumeForm() {
   const [livePreviewStageHeight, setLivePreviewStageHeight] = useState(697);
 
   useEffect(() => {
+    if (!savedMessage) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setSavedMessage("");
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [savedMessage]);
+
+  useEffect(() => {
     const updateLivePreviewScale = () => {
       const scroll = livePreviewScrollRef.current;
       if (!scroll) return;

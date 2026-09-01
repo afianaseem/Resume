@@ -430,7 +430,7 @@ export default function AdminDashboard() {
             new Date(b.updated_at || 0) -
             new Date(a.updated_at || 0)
         )
-        .slice(0, 8),
+        .slice(0, 10),
     [resumes]
   );
 
@@ -442,7 +442,7 @@ export default function AdminDashboard() {
             new Date(b.created_at || 0) -
             new Date(a.created_at || 0)
         )
-        .slice(0, 8),
+        .slice(0, 10),
     [resumes]
   );
 

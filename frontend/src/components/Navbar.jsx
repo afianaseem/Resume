@@ -79,7 +79,8 @@ export default function Navbar() {
           </div>
 
           <button type="button" className="logout-button" onClick={handleLogout} title="Log out" aria-label="Log out">
-            ↪
+            <span aria-hidden="true">↪</span>
+            <span className="logout-button-text">Log out</span>
           </button>
         </nav>
 
