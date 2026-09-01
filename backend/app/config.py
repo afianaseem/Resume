@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # Authentication
     # ---------------------------------------------------------
 
-    secret_key: str = "insecure-dev-key-change-me"
+    secret_key: str = ""
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
 
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     # CORS
     # ---------------------------------------------------------
 
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     # ---------------------------------------------------------
     # Email
@@ -83,6 +83,19 @@ class Settings(BaseSettings):
 
     def validate_runtime_configuration(self):
 
+        insecure_secret_values = {
+            "",
+            "insecure-dev-key-change-me",
+            "change-me",
+            "resume-builder-dev-secret-change-me",
+        }
+
+        if self.secret_key in insecure_secret_values:
+            raise RuntimeError(
+                "SECRET_KEY is missing or still using a development default. "
+                "Set a strong SECRET_KEY in your environment file or deployment variables."
+            )
+
         if not self.is_vercel:
             return
 
@@ -97,12 +110,6 @@ class Settings(BaseSettings):
         if not self.is_postgres:
             raise RuntimeError(
                 "DATABASE_URL must be a PostgreSQL connection string."
-            )
-
-        if self.secret_key == "insecure-dev-key-change-me":
-            raise RuntimeError(
-                "SECRET_KEY is using the development default. "
-                "Set a strong SECRET_KEY in Vercel Environment Variables."
             )
 
 

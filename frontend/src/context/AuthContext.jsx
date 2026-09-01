@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
    * The cached user allows the application shell
    * to appear immediately.
    */
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
@@ -49,6 +49,7 @@ export function AuthProvider({ children }) {
       localStorage.getItem("token");
 
     if (!token) {
+      setLoading(false);
       return;
     }
 
@@ -89,6 +90,13 @@ export function AuthProvider({ children }) {
           localStorage.removeItem("user");
 
           setUser(null);
+        }
+      })
+
+      .finally(() => {
+
+        if (active) {
+          setLoading(false);
         }
       });
 
