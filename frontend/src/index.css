@@ -4713,9 +4713,9 @@ body {
 .mobile-logout:hover { background:var(--danger-light); color:var(--danger); }
 
 /* ---------- Dashboard: actual A4 resume thumbnails ---------- */
-.resume-card-preview-link { margin: -20px -20px 18px; }
+.resume-card-preview-link { margin: -16px -16px 14px; }
 .resume-card-preview {
-  height: 452px;
+  height: 260px;
   position: relative;
   overflow: hidden;
   display:flex;
@@ -4869,7 +4869,7 @@ body {
   .dashboard-hero { gap:18px; }
   .dashboard-hero h1 { font-size:36px; }
   .resume-grid { grid-template-columns:1fr !important; }
-  .resume-card-preview { height:452px !important; }
+  .resume-card-preview { height:280px !important; }
   .resume-card-preview-scale { transform:translateX(-50%) scale(.40) !important; }
 
   .template-gallery-header { align-items:flex-start; flex-direction:column; }
@@ -4897,7 +4897,7 @@ body {
   .brand-mark { width:31px; height:31px; }
   .mobile-menu-button { min-height:38px; padding:0 11px; }
   .dashboard-hero h1 { font-size:32px; }
-  .resume-card-preview { height:430px !important; }
+  .resume-card-preview { height:260px !important; }
   .resume-card-preview-scale { transform:translateX(-50%) scale(.37) !important; }
   .template-real-preview { height:475px !important; }
   .template-preview-canvas { transform:translateX(-50%) scale(.40) !important; }
