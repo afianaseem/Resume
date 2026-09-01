@@ -3238,48 +3238,39 @@ button:disabled {
 
   height: calc(100vh - 120px);
 
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: var(--radius-lg);
-  background: var(--surface-soft);
-  box-shadow: var(--shadow-sm);
+  background: transparent;
   overflow: hidden;
-}
-
-.resume-live-preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-
-  padding: 12px 16px;
-
-  border-bottom: 1px solid var(--border);
-  background: #fff;
-
-  color: var(--text);
-  font-size: 11.5px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
 }
 
 .resume-live-preview-scroll {
   flex: 1;
   overflow: auto;
-  padding: 18px;
+  padding: 14px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #faf8ff 0%, #f4f3f8 100%);
+  box-shadow: var(--shadow-sm);
 }
 
-/* The resume is authored at print (mm) dimensions, so we scale the
-   whole document down to fit the narrow preview panel rather than
-   trying to maintain two separate layouts. */
+.resume-live-preview-stage {
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+}
+
 .resume-live-preview-scale {
-  width: 161.29%; /* 100 / 0.62 */
-  transform: scale(0.62);
-  transform-origin: top left;
+  transform: scale(0.78);
+  transform-origin: top center;
+  width: 794px;
+  margin: 0 auto;
 }
 
 .resume-live-preview-scale .resume-print-area {
   box-shadow: var(--shadow);
+  border: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 @media (max-width: 1200px) {

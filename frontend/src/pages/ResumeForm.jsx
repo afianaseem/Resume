@@ -1414,12 +1414,6 @@ export default function ResumeForm() {
 
           {showPreview && (
             <aside className="resume-live-preview no-print">
-              <div className="resume-live-preview-header">
-                <span>Live preview</span>
-                <span className="text-muted small">
-                  {getTemplate(template).name}
-                </span>
-              </div>
               <div className="resume-live-preview-scroll" ref={livePreviewScrollRef}>
                 <div
                   className="resume-live-preview-stage"
