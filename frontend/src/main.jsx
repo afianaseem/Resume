@@ -6,11 +6,14 @@ import "./index.css";
 import "./responsive-fixes.css";
 
 import App from "./App.jsx";
+import { DialogProvider } from "./context/DialogContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <DialogProvider>
+        <App />
+      </DialogProvider>
     </BrowserRouter>
   </StrictMode>
 );

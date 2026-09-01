@@ -4,6 +4,7 @@ import { listResumes, deleteResume, createResume } from "../api/resumes";
 import Navbar from "../components/Navbar";
 import ResumeDocument from "../components/ResumeDocument";
 import { getTemplate } from "../templates";
+import { useDialog } from "../context/DialogContext";
 
 function formatDate(iso) {
   if (!iso) return "Unknown";
@@ -91,6 +92,7 @@ export default function Dashboard() {
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
+  const { confirm, prompt } = useDialog();
 
   const load = async () => {
     setLoading(true);
@@ -116,7 +118,12 @@ export default function Dashboard() {
   }, []);
 
   const handleCreate = async () => {
-    const name = window.prompt('Name this resume (e.g. "Python Developer 2026")');
+    const name = await prompt(
+      "Create a new resume",
+      "Give your resume a name so you can find it easily later.",
+      "",
+      { placeholder: 'e.g. "Python Developer 2026"', confirmLabel: "Create resume" }
+    );
     if (!name?.trim()) return;
 
     setCreating(true);
@@ -133,7 +140,11 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete "${name}"?\n\nThis action cannot be undone.`)) return;
+    if (!await confirm(
+      "Delete resume?",
+      `Delete “${name}”? This action cannot be undone.`,
+      { tone: "danger", confirmLabel: "Delete resume" }
+    )) return;
 
     try {
       await deleteResume(id);

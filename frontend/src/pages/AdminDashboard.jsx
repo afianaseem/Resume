@@ -8,6 +8,7 @@ import {
   adminSetUserStatus,
 } from "../api/resumes";
 import { TEMPLATE_COLORS, TEMPLATES } from "../templates";
+import { useDialog } from "../context/DialogContext";
 
 function formatDate(value) {
   if (!value) return "—";
@@ -263,6 +264,7 @@ export default function AdminDashboard() {
   const [query, setQuery] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const { confirm } = useDialog();
 
   const load = async () => {
     try {
@@ -295,8 +297,10 @@ export default function AdminDashboard() {
   }, []);
 
   const deleteResume = async (resume) => {
-    const confirmed = window.confirm(
-      `Delete "${resume.name}" from ${resume.owner_name}? This cannot be undone.`
+    const confirmed = await confirm(
+      "Delete resume?",
+      `Delete “${resume.name}" from ${resume.owner_name}? This cannot be undone.`,
+      { tone: "danger", confirmLabel: "Delete resume" }
     );
 
     if (!confirmed) return;
@@ -346,8 +350,10 @@ export default function AdminDashboard() {
   };
 
   const deleteUser = async (user) => {
-    const confirmed = window.confirm(
-      `Deactivate user ${user.name}? Their resumes will be preserved and their account can be activated again.`
+    const confirmed = await confirm(
+      "Deactivate user?",
+      `Deactivate ${user.name}? Their resumes will be preserved and their account can be activated again.`,
+      { tone: "danger", confirmLabel: "Deactivate user" }
     );
 
     if (!confirmed) return;

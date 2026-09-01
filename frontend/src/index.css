@@ -5032,6 +5032,123 @@ body {
   }
 }
 
+/* =========================================
+   APP DIALOGS
+========================================= */
+
+.app-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(20, 16, 35, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.app-dialog {
+  position: relative;
+  width: min(100%, 420px);
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  animation: app-dialog-in 0.18s ease-out;
+}
+
+.app-dialog-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.app-dialog-icon.danger {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.app-dialog h2 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 20px;
+}
+
+.app-dialog p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.app-dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--text-muted);
+  font-size: 19px;
+}
+
+.app-dialog-input {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 18px;
+  padding: 0 12px;
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  outline: 0;
+  color: var(--text);
+  background: #fff;
+}
+
+.app-dialog-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(109, 61, 245, 0.1);
+}
+
+.app-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 24px;
+}
+
+.app-dialog-danger-button {
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid var(--danger);
+  border-radius: 10px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+@keyframes app-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 520px) {
+  .app-dialog-overlay { align-items: end; padding: 12px; }
+  .app-dialog { width: 100%; padding: 24px 18px 18px; border-radius: 16px; }
+  .app-dialog-actions { flex-direction: column-reverse; }
+  .app-dialog-actions button { width: 100%; min-height: 44px; }
+}
+
 /* =========================================================
    REMOVE MOBILE STYLES FROM THE ACTUAL A4 PREVIEW
    These prevent unequal spacing caused by the generic mobile

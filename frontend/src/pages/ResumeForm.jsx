@@ -10,6 +10,7 @@ import DateRangeFields from "../components/DateRangeFields";
 import PhoneField from "../components/PhoneField";
 import { getTemplate, TEMPLATE_COLORS } from "../templates";
 import { COUNTRY_CODES, DEFAULT_COUNTRY_DIAL, findCountryByDial } from "../countryCodes";
+import { useDialog } from "../context/DialogContext";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/;
 
@@ -95,6 +96,7 @@ function combinePhone(dial, number) {
 export default function ResumeForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { confirm, prompt } = useDialog();
 
   const [step, setStep] = useState(0);
   const [resumeName, setResumeName] = useState("");
@@ -326,7 +328,12 @@ export default function ResumeForm() {
 
   const saveVersion = async () => {
     await persist(true);
-    const label = window.prompt("Name this version", `${resumeName || "Resume"} · ${new Date().toLocaleDateString()}`);
+    const label = await prompt(
+      "Save a resume version",
+      "Name this snapshot so you can restore it later.",
+      `${resumeName || "Resume"} · ${new Date().toLocaleDateString()}`,
+      { placeholder: "Version name", confirmLabel: "Save version" }
+    );
     if (!label) return;
     try {
       const version = await createResumeVersion(id, label);
@@ -339,7 +346,11 @@ export default function ResumeForm() {
   };
 
   const restoreVersion = async (version) => {
-    if (!window.confirm(`Restore "${version.label}"? Your current resume will be replaced.`)) return;
+    if (!await confirm(
+      "Restore this version?",
+      `Restore “${version.label}”? Your current resume will be replaced.`,
+      { tone: "danger", confirmLabel: "Restore version" }
+    )) return;
     try {
       const r = await restoreResumeVersion(id, version.id);
       setResumeName(r.name); setTemplate(r.template); setColor(r.color);
