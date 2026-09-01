@@ -1701,6 +1701,19 @@ button:disabled {
   font-weight: 700;
 }
 
+.resume-sidebar-item-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.resume-sidebar-item-field,
+.resume-sidebar-item-grade {
+  color: #d8d5e0;
+  font-size: 9.5px;
+  line-height: 1.5;
+}
+
 .resume-sidebar-item-date {
   color: #9993ab !important;
   font-size: 8.5px !important;

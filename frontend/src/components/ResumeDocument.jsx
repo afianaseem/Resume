@@ -1022,10 +1022,13 @@ export default function ResumeDocument({
                   : [
                       {
                         degree: "",
+                        field: "",
                         school: "",
+                        grade: "",
                         start_date: "",
                         end_date: "",
                         current: false,
+                        date_display: "",
                       },
                     ]
               ).map((edu, index) => (
@@ -1034,22 +1037,39 @@ export default function ResumeDocument({
                   key={index}
                 >
                   {editable ? (
-                    <Editable
-                      value={edu.degree}
-                      onChange={(value) =>
-                        updateArray(
-                          "education",
-                          index,
-                          "degree",
-                          value
-                        )
-                      }
-                      className="resume-sidebar-item-title"
-                      placeholder="Degree"
-                    />
+                    <div className="resume-sidebar-item-head">
+                      <Editable
+                        value={edu.degree}
+                        onChange={(value) =>
+                          updateArray(
+                            "education",
+                            index,
+                            "degree",
+                            value
+                          )
+                        }
+                        className="resume-sidebar-item-title"
+                        placeholder="Degree"
+                      />
+
+                      <Editable
+                        value={edu.field}
+                        onChange={(value) =>
+                          updateArray(
+                            "education",
+                            index,
+                            "field",
+                            value
+                          )
+                        }
+                        className="resume-sidebar-item-field"
+                        placeholder="Field of study"
+                      />
+                    </div>
                   ) : (
                     <p className="resume-sidebar-item-title">
                       {edu.degree || "Degree"}
+                      {edu.field ? `, ${edu.field}` : ""}
                     </p>
                   )}
 
@@ -1069,6 +1089,28 @@ export default function ResumeDocument({
                   ) : (
                     edu.school && (
                       <p>{edu.school}</p>
+                    )
+                  )}
+
+                  {editable ? (
+                    <Editable
+                      value={edu.grade}
+                      onChange={(value) =>
+                        updateArray(
+                          "education",
+                          index,
+                          "grade",
+                          value
+                        )
+                      }
+                      className="resume-sidebar-item-grade"
+                      placeholder="Grade / GPA"
+                    />
+                  ) : (
+                    edu.grade && (
+                      <p className="resume-sidebar-item-grade">
+                        {edu.grade}
+                      </p>
                     )
                   )}
 
@@ -1096,6 +1138,18 @@ export default function ResumeDocument({
                     ))}
                 </div>
               ))}
+
+              {editable && (
+                <button
+                  type="button"
+                  className="resume-inline-add"
+                  onClick={() =>
+                    updateArray("education", "add")
+                  }
+                >
+                  + Add education
+                </button>
+              )}
             </div>
           )}
         </aside>
