@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { listResumes, deleteResume, createResume } from "../api/resumes";
 import Navbar from "../components/Navbar";
 import ResumeDocument from "../components/ResumeDocument";
-import { getTemplate } from "../templates";
+import { getTemplate, TEMPLATES, TEMPLATE_COLORS } from "../templates";
 import { useDialog } from "../context/DialogContext";
 
 function formatDate(iso) {
@@ -91,6 +91,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [templateFilter, setTemplateFilter] = useState("all");
+  const [colorFilter, setColorFilter] = useState("all");
   const navigate = useNavigate();
   const { confirm, prompt } = useDialog();
 
@@ -154,6 +158,22 @@ export default function Dashboard() {
     }
   };
 
+  const visibleResumes = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const filtered = resumes.filter((resume) => {
+      const matchesSearch = !normalizedSearch || String(resume.name || "").toLowerCase().includes(normalizedSearch);
+      const matchesTemplate = templateFilter === "all" || (resume.template || "classic") === templateFilter;
+      const matchesColor = colorFilter === "all" || (resume.color || "violet") === colorFilter;
+      return matchesSearch && matchesTemplate && matchesColor;
+    });
+
+    return filtered.sort((a, b) => {
+      if (sortBy === "alphabetical") return String(a.name || "").localeCompare(String(b.name || ""));
+      const difference = new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+      return sortBy === "oldest" ? -difference : difference;
+    });
+  }, [resumes, search, sortBy, templateFilter, colorFilter]);
+
   return (
     <div className="app-shell">
       <Navbar />
@@ -208,10 +228,35 @@ export default function Dashboard() {
 
             {!loading && resumes.length > 0 && (
               <span className="resume-count">
-                {resumes.length} {resumes.length === 1 ? "resume" : "resumes"}
+                {visibleResumes.length} of {resumes.length} {resumes.length === 1 ? "resume" : "resumes"}
               </span>
             )}
           </div>
+
+          {!loading && resumes.length > 0 && (
+            <div className="resume-collection-controls">
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search resumes by name..."
+                aria-label="Search resumes by name"
+              />
+              <select value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label="Sort resumes">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+                <option value="alphabetical">Alphabetical</option>
+              </select>
+              <select value={templateFilter} onChange={(event) => setTemplateFilter(event.target.value)} aria-label="Filter by template">
+                <option value="all">All templates</option>
+                {TEMPLATES.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+              </select>
+              <select value={colorFilter} onChange={(event) => setColorFilter(event.target.value)} aria-label="Filter by color">
+                <option value="all">All colors</option>
+                {TEMPLATE_COLORS.map((color) => <option key={color.id} value={color.id}>{color.name}</option>)}
+              </select>
+            </div>
+          )}
 
           {loading ? (
             <div className="dashboard-loading">
@@ -227,9 +272,14 @@ export default function Dashboard() {
                 + Create my first resume
               </button>
             </div>
+          ) : visibleResumes.length === 0 ? (
+            <div className="empty-state resume-filter-empty">
+              <h2>No matching resumes</h2>
+              <p>Try changing your search or filters.</p>
+            </div>
           ) : (
             <div className="resume-grid">
-              {resumes.map((resume) => (
+              {visibleResumes.map((resume) => (
                 <article className="resume-card" key={resume.id}>
                   <Link
                     className="resume-card-preview-link"

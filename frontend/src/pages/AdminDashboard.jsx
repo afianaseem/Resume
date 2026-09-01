@@ -10,6 +10,8 @@ import {
 import { TEMPLATE_COLORS, TEMPLATES } from "../templates";
 import { useDialog } from "../context/DialogContext";
 
+const ADMIN_PAGE_SIZE = 8;
+
 function formatDate(value) {
   if (!value) return "—";
 
@@ -212,6 +214,18 @@ function UserAdminCard({ user, onDelete, onReactivate }) {
   );
 }
 
+function Pagination({ page, pageCount, onChange }) {
+  if (pageCount <= 1) return null;
+
+  return (
+    <div className="admin-pagination" aria-label="Pagination">
+      <button type="button" onClick={() => onChange(page - 1)} disabled={page === 1}>Previous</button>
+      <span>Page {page} of {pageCount}</span>
+      <button type="button" onClick={() => onChange(page + 1)} disabled={page === pageCount}>Next</button>
+    </div>
+  );
+}
+
 function ActivityItem({ resume, type }) {
   return (
     <div className="admin-activity-item">
@@ -264,6 +278,7 @@ export default function AdminDashboard() {
   const [query, setQuery] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [page, setPage] = useState(1);
   const { confirm } = useDialog();
 
   const load = async () => {
@@ -452,6 +467,21 @@ export default function AdminDashboard() {
     );
   }, [resumes, normalizedQuery]);
 
+  const pagedUsers = useMemo(
+    () => filteredUsers.slice((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE),
+    [filteredUsers, page]
+  );
+  const pagedResumes = useMemo(
+    () => filteredResumes.slice((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE),
+    [filteredResumes, page]
+  );
+  const pageItems = tab === "users" ? filteredUsers : filteredResumes;
+  const pageCount = Math.max(1, Math.ceil(pageItems.length / ADMIN_PAGE_SIZE));
+
+  useEffect(() => {
+    setPage(1);
+  }, [tab, normalizedQuery, fromDate, toDate]);
+
   const recentUpdated = useMemo(
     () =>
       [...resumes]
@@ -591,7 +621,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 className={tab === "users" ? "active" : ""}
-                onClick={() => setTab("users")}
+                onClick={() => { setTab("users"); setPage(1); }}
               >
                 <span>◉</span>
                 Users
@@ -602,7 +632,7 @@ export default function AdminDashboard() {
                 className={
                   tab === "resumes" ? "active" : ""
                 }
-                onClick={() => setTab("resumes")}
+                onClick={() => { setTab("resumes"); setPage(1); }}
               >
                 <span>▤</span>
                 Resumes
@@ -613,7 +643,7 @@ export default function AdminDashboard() {
                 className={
                   tab === "activity" ? "active" : ""
                 }
-                onClick={() => setTab("activity")}
+                onClick={() => { setTab("activity"); setPage(1); }}
               >
                 <span>↗</span>
                 Activity
@@ -703,7 +733,7 @@ export default function AdminDashboard() {
 
           {/* USERS */}
           {tab === "users" && (
-            <div className="admin-card-grid">
+            <div className="admin-table-section">
               {loading && !users.length ? (
                 <div className="admin-loading-state">
                   <div className="loading-spinner" />
@@ -711,14 +741,21 @@ export default function AdminDashboard() {
                   <p>Getting administrator data ready.</p>
                 </div>
               ) : filteredUsers.length ? (
-                filteredUsers.map((user) => (
-                  <UserAdminCard
-                    key={user.id}
-                    user={user}
-                    onDelete={deleteUser}
-                    onReactivate={reactivateUser}
-                  />
-                ))
+                <>
+                  <div className="admin-table-wrap">
+                    <table className="admin-data-table">
+                      <thead><tr><th>User</th><th>Status</th><th>Resumes</th><th>Joined</th><th>Action</th></tr></thead>
+                      <tbody>{pagedUsers.map((user) => <tr key={user.id}>
+                        <td><strong>{user.name || "Unnamed user"}</strong><span>{user.email || "No email"}</span></td>
+                        <td><span className={`admin-status-badge ${user.is_deleted || user.deleted_at || user.is_active === false ? "deleted" : "active"}`}>{user.is_deleted || user.deleted_at || user.is_active === false ? "Deleted" : "Active"}</span></td>
+                        <td>{user.resume_count || 0}</td>
+                        <td>{formatDate(user.created_at)}</td>
+                        <td>{user.is_admin ? <span className="admin-protected-label">Administrator</span> : user.is_deleted || user.deleted_at || user.is_active === false ? <button type="button" className="admin-card-activate-button" onClick={() => reactivateUser(user)}>Activate user</button> : <button type="button" className="admin-card-delete-button" onClick={() => deleteUser(user)}>Delete user</button>}</td>
+                      </tr>)}</tbody>
+                    </table>
+                  </div>
+                  <Pagination page={page} pageCount={pageCount} onChange={setPage} />
+                </>
               ) : (
                 <div className="admin-empty-state">
                   <div>◉</div>
@@ -739,7 +776,7 @@ export default function AdminDashboard() {
 
           {/* RESUMES */}
           {tab === "resumes" && (
-            <div className="admin-card-grid admin-resume-grid">
+            <div className="admin-table-section">
               {loading && !resumes.length ? (
                 <div className="admin-loading-state">
                   <div className="loading-spinner" />
@@ -747,13 +784,22 @@ export default function AdminDashboard() {
                   <p>Getting resume data ready.</p>
                 </div>
               ) : filteredResumes.length ? (
-                filteredResumes.map((resume) => (
-                  <ResumeAdminCard
-                    key={resume.id}
-                    resume={resume}
-                    onDelete={deleteResume}
-                  />
-                ))
+                <>
+                  <div className="admin-table-wrap">
+                    <table className="admin-data-table">
+                      <thead><tr><th>Resume</th><th>Owner</th><th>Template</th><th>Color</th><th>Updated</th><th>Action</th></tr></thead>
+                      <tbody>{pagedResumes.map((resume) => <tr key={resume.id}>
+                        <td><strong>{resume.name || "Untitled resume"}</strong><span>#{resume.id}</span></td>
+                        <td><strong>{resume.owner_name || "Unknown user"}</strong><span>{resume.owner_email || "No email"}</span></td>
+                        <td>{getTemplateName(resume.template)}</td>
+                        <td><span className="admin-color-value"><i style={{ backgroundColor: getTemplateColor(resume.color).value }} />{getTemplateColor(resume.color).name}</span></td>
+                        <td>{formatDate(resume.updated_at)}</td>
+                        <td><div className="admin-table-actions"><Link className="admin-card-view-button" to={`/admin/resumes/${resume.id}`}>View</Link><button type="button" className="admin-card-delete-button" onClick={() => deleteResume(resume)}>Delete</button></div></td>
+                      </tr>)}</tbody>
+                    </table>
+                  </div>
+                  <Pagination page={page} pageCount={pageCount} onChange={setPage} />
+                </>
               ) : (
                 <div className="admin-empty-state">
                   <div>▤</div>

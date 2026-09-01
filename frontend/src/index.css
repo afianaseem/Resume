@@ -528,6 +528,32 @@ button:disabled {
   margin-top: 8px;
 }
 
+.resume-collection-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.resume-collection-controls input,
+.resume-collection-controls select {
+  min-width: 0;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font-size: 12px;
+  outline: 0;
+}
+
+.resume-collection-controls input:focus,
+.resume-collection-controls select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(109, 61, 245, 0.08);
+}
+
 .section-heading-row {
   display: flex;
   align-items: flex-end;
