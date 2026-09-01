@@ -375,7 +375,7 @@ export default function Signup() {
               >
                 <span>!</span>
 
-                <span>
+                <span className="form-error-message">
                   {error}
                 </span>
               </div>
