@@ -281,8 +281,14 @@ def set_user_status(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.is_active = 1 if active else 0
+    user.deleted_at = None if active else (user.deleted_at or datetime.utcnow())
     db.commit()
-    return {"id": user.id, "is_active": bool(user.is_active)}
+    return {
+        "id": user.id,
+        "is_active": bool(user.is_active),
+        "deleted_at": user.deleted_at,
+        "is_deleted": user.deleted_at is not None,
+    }
 
 @router.delete("/users/{user_id}")
 def delete_user(user_id: int, admin: models.User = Depends(auth.get_current_admin), db: Session = Depends(get_db)):
