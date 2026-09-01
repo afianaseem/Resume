@@ -528,6 +528,84 @@ button:disabled {
   margin-top: 8px;
 }
 
+.resume-quality-panel {
+  margin: 0 0 22px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.resume-quality-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.resume-quality-heading h2 {
+  margin: 4px 0 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.resume-quality-score {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 3px;
+  color: var(--text-muted);
+}
+
+.resume-quality-score strong {
+  color: var(--primary);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.resume-quality-score span { font-size: 11px; }
+.resume-quality-score small { grid-column: 1 / -1; margin-top: 4px; text-align: right; font-size: 10px; font-weight: 750; }
+
+.resume-quality-progress {
+  height: 7px;
+  margin: 16px 0 13px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.resume-quality-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), #18a66a);
+  transition: width .25s ease;
+}
+
+.resume-quality-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resume-quality-list li { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+.resume-quality-list li > span { width: 19px; height: 19px; flex: 0 0 19px; display: grid; place-items: center; margin-top: 1px; border-radius: 50%; font-size: 10px; font-weight: 800; }
+.resume-quality-list li.passed > span { background: #eaf8f0; color: #167447; }
+.resume-quality-list li.needs-work > span { background: var(--danger-light); color: var(--danger); }
+.resume-quality-list li div { min-width: 0; }
+.resume-quality-list strong, .resume-quality-list small { display: block; }
+.resume-quality-list strong { color: var(--text); font-size: 11px; }
+.resume-quality-list small { margin-top: 2px; color: var(--text-muted); font-size: 10px; line-height: 1.4; }
+
+@media (max-width: 620px) {
+  .resume-quality-panel { padding: 16px; }
+  .resume-quality-list { grid-template-columns: 1fr; }
+}
+
 .resume-collection-controls {
   display: grid;
   grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(140px, 1fr));

@@ -11,6 +11,7 @@ import PhoneField from "../components/PhoneField";
 import { getTemplate, TEMPLATE_COLORS } from "../templates";
 import { COUNTRY_CODES, DEFAULT_COUNTRY_DIAL, findCountryByDial } from "../countryCodes";
 import { useDialog } from "../context/DialogContext";
+import ResumeQualityScore from "../components/ResumeQualityScore";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/;
 
@@ -692,6 +693,15 @@ export default function ResumeForm() {
             {error}
           </div>
         )}
+
+        <ResumeQualityScore
+          personalInfo={livePersonalInfo}
+          education={education}
+          experience={experience}
+          skills={skills}
+          projects={projects}
+          template={template}
+        />
 
         <div className={`resume-editor-layout ${showPreview ? "" : "preview-hidden"}`}>
           <div className="resume-editor-column">
