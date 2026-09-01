@@ -4713,9 +4713,13 @@ body {
 .mobile-logout:hover { background:var(--danger-light); color:var(--danger); }
 
 /* ---------- Dashboard: actual A4 resume thumbnails ---------- */
+.resume-card {
+  height: 360px;
+}
+
 .resume-card-preview-link { margin: -16px -16px 14px; }
 .resume-card-preview {
-  height: 260px;
+  height: 220px;
   position: relative;
   overflow: hidden;
   display:flex;
@@ -4762,6 +4766,12 @@ body {
   background:rgba(255,255,255,.86); color:var(--text-secondary); font-size:9px; font-weight:750;
   box-shadow:0 4px 14px rgba(20,16,35,.08); pointer-events:none;
 }
+
+.resume-card-top { margin-bottom: 8px; }
+.resume-card-content { min-height: 42px; }
+.resume-card-actions { margin-top: 10px; }
+.resume-card-actions .btn-primary,
+.resume-card-actions .btn-secondary { min-height: 36px; }
 
 /* ---------- Template gallery: real A4 cards ---------- */
 .template-gallery-page .page-content { padding-bottom:110px; }
@@ -4869,7 +4879,8 @@ body {
   .dashboard-hero { gap:18px; }
   .dashboard-hero h1 { font-size:36px; }
   .resume-grid { grid-template-columns:1fr !important; }
-  .resume-card-preview { height:280px !important; }
+  .resume-card { height: 360px; }
+  .resume-card-preview { height:220px !important; }
   .resume-card-preview-scale { transform:translateX(-50%) scale(.40) !important; }
 
   .template-gallery-header { align-items:flex-start; flex-direction:column; }
@@ -4897,7 +4908,8 @@ body {
   .brand-mark { width:31px; height:31px; }
   .mobile-menu-button { min-height:38px; padding:0 11px; }
   .dashboard-hero h1 { font-size:32px; }
-  .resume-card-preview { height:260px !important; }
+  .resume-card { height: 340px; }
+  .resume-card-preview { height:208px !important; }
   .resume-card-preview-scale { transform:translateX(-50%) scale(.37) !important; }
   .template-real-preview { height:475px !important; }
   .template-preview-canvas { transform:translateX(-50%) scale(.40) !important; }
