@@ -2408,6 +2408,18 @@ button:disabled {
   font-weight: 850;
 }
 
+.profile-avatar-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.profile-avatar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
 .profile-identity h2 {
   margin: 0 0 3px;
   font-size: 16px;
@@ -2418,6 +2430,12 @@ button:disabled {
   margin: 0;
   color: var(--text-muted);
   font-size: 11px;
+}
+
+@media (max-width: 620px) {
+  .profile-identity { align-items: flex-start; flex-wrap: wrap; }
+  .profile-avatar-actions { width: 100%; margin-left: 0; padding-left: 73px; }
+  .profile-avatar-actions > * { flex: 1; text-align: center; }
 }
 
 .settings-card {
