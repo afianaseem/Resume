@@ -1548,3 +1548,41 @@
     padding: 5px;
   }
 }
+
+@media (prefers-color-scheme: dark) {
+  .admin-hero-badge,
+  .admin-workspace,
+  .admin-card-grid,
+  .admin-table-section,
+  .admin-table-wrap,
+  .admin-data-table th,
+  .admin-user-card-details,
+  .admin-search-large,
+  .admin-date-group input,
+  .admin-filter-panel,
+  .admin-user-card,
+  .admin-resume-card,
+  .admin-activity-panel,
+  .admin-activity-item,
+  .admin-panel,
+  .admin-pagination button {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .admin-card-grid,
+  .admin-table-section,
+  .admin-filter-panel {
+    background: var(--surface-soft);
+  }
+
+  .admin-data-table td {
+    border-color: var(--border);
+  }
+
+  .admin-data-table th,
+  .admin-table-section {
+    color: var(--text-secondary);
+  }
+}
